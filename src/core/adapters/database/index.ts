@@ -4,7 +4,7 @@ import { DBResource } from "./models/DBResource";
 import { DBResourceHistory } from "./models/DBResourceHistory";
 import { DBResourceQueue } from "./models/DBResourceQueue";
 import { Sequelize } from "sequelize";
-import { migrate } from "./migration";
+import { migrate as rawMigrate } from "./migration";
 
 export const sequelize = new Sequelize({
   dialect: "sqlite",
@@ -29,4 +29,4 @@ DBResourceHistory.belongsTo(DBResource, {
 DBResource.hasMany(DBResourceQueue, { foreignKey: "resourceId" });
 DBResourceQueue.belongsTo(DBResource, { foreignKey: "resourceId" });
 
-migrate(sequelize);
+export const migrate = () => rawMigrate(sequelize);

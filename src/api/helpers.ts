@@ -8,7 +8,9 @@ export const send = <K extends EventKey>(key: K, params: EventList[K]) => {
 export type Handler<K extends EventKey> = (
   event: IpcRendererEvent,
   params: EventList[K]
-) => EventList[K];
+) => void;
+
+export type Listener<K extends EventKey> = (handler: Handler<K>) => () => void;
 
 export const listen = <K extends EventKey>(key: K, handler: Handler<K>) => {
   ipcRenderer.on(key, handler);

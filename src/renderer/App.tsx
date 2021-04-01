@@ -12,13 +12,19 @@ const App: React.FC = () => {
   const [resources, setResources] = useState<Resource[]>([]);
 
   const onClickButton = useCallback(() => {
-    api.addBms(specUrl);
+    api.requestAddBms(specUrl);
   }, [specUrl]);
 
   useEffect(() => {
     return api.listenToResourceQueues((e, { resources }) => {
       console.log("これが一覧だ", resources);
       setResources(resources);
+    });
+  });
+
+  useEffect(() => {
+    return api.listtenToTest(() => {
+      console.log("TEST");
     });
   });
 
@@ -32,12 +38,19 @@ const App: React.FC = () => {
       />
       {resources.map((res) => {
         return (
-          <p key={res.id}>
-            {res.url} {res.type}
-          </p>
+          <div key={res.id}>
+            <p>{res.url}</p>
+            <p>{res.type}</p>
+            <div>
+              <button onClick={() => api.requestInstallResources([res])}>
+                ダウンロード
+              </button>
+            </div>
+          </div>
         );
       })}
       <button onClick={onClickButton}>BUTTON</button>
+      <button onClick={() => api.test()}>TEST</button>
     </div>
   );
 };
