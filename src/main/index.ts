@@ -1,5 +1,3 @@
-import "./app/events/AppEventListener.ts";
-
 import { app } from "electron";
 import { onAppReady } from "./app";
 

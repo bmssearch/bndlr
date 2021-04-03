@@ -1,18 +1,20 @@
 import { DataTypes, Model, Optional, Sequelize } from "sequelize";
 
-export interface DBResourceHistoryAttrs {
+import { InstallationHistory } from "../../../models/InstallationHistory";
+
+export interface DBInstallationHistoryAttrs {
   id: number;
   resourceId: number;
   result: "installed" | "failed" | "skipped";
   checkedAt: Date;
 }
 
-interface DBResourceHistoryCreationAttrs
-  extends Optional<DBResourceHistoryAttrs, "id"> {}
+interface DBInstallationHistoryCreationAttrs
+  extends Optional<DBInstallationHistoryAttrs, "id"> {}
 
-export class DBResourceHistory
-  extends Model<DBResourceHistoryAttrs, DBResourceHistoryCreationAttrs>
-  implements DBResourceHistoryAttrs {
+export class DBInstallationHistory
+  extends Model<DBInstallationHistoryAttrs, DBInstallationHistoryCreationAttrs>
+  implements DBInstallationHistoryAttrs {
   static initialize(sequelize: Sequelize) {
     this.init(
       {
@@ -36,9 +38,18 @@ export class DBResourceHistory
           allowNull: false,
         },
       },
-      { sequelize, timestamps: false, tableName: "checked_resources" }
+      { sequelize, timestamps: false, tableName: "installation_histories" }
     );
   }
+
+  public toInstallationHistory = (): InstallationHistory => {
+    return new InstallationHistory({
+      id: this.id,
+      resourceId: this.resourceId,
+      result: this.result,
+      checkedAt: this.checkedAt,
+    });
+  };
 
   public id!: number;
   public resourceId!: number;

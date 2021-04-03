@@ -30,9 +30,9 @@ export class ResourceFilter {
         }
         case "latest": {
           const latest = coreResources.reduce((a, b) => {
-            if (!b.updated_at) return a;
-            if (!a.updated_at) return b;
-            return a.updated_at < b.updated_at ? b : a;
+            if (!b.updatedAt) return a;
+            if (!a.updatedAt) return b;
+            return a.updatedAt < b.updatedAt ? b : a;
           });
           filteredResources.push(latest);
           break;

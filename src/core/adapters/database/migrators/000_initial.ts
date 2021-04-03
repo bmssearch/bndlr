@@ -72,11 +72,12 @@ export const migrator: Migrator = {
       { uniqueKeys: { urlWithBmsId: { fields: ["bmsId", "url"] } } }
     );
 
-    await qi.createTable("resource_queues", {
+    await qi.createTable("installation_proposals", {
       id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
+        autoIncrement: true,
       },
       resourceId: {
         type: DataTypes.INTEGER,
@@ -85,11 +86,11 @@ export const migrator: Migrator = {
       },
       updatedAt: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: true,
       },
     });
 
-    await qi.createTable("resource_histories", {
+    await qi.createTable("installation_histories", {
       id: {
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
@@ -116,7 +117,7 @@ export const migrator: Migrator = {
     await qi.dropTable("bmses");
     await qi.dropTable("observations");
     await qi.dropTable("resources");
-    await qi.dropTable("resource_queues");
-    await qi.dropTable("resource_histories");
+    await qi.dropTable("installation_proposals");
+    await qi.dropTable("installation_histories");
   },
 };

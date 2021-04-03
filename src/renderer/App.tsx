@@ -16,14 +16,16 @@ const App: React.FC = () => {
   }, [specUrl]);
 
   useEffect(() => {
-    return api.listenToResourceQueues((e, { resources }) => {
-      console.log("これが一覧だ", resources);
-      setResources(resources);
-    });
+    return api.listenToInstallationProposalsUpdate(
+      (e, { installationProposals }) => {
+        console.log("これが一覧だ", installationProposals);
+        setResources([]);
+      }
+    );
   });
 
   useEffect(() => {
-    return api.listtenToTest(() => {
+    return api.listenToTest(() => {
       console.log("TEST");
     });
   });

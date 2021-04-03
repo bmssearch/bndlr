@@ -1,18 +1,27 @@
-import { EventKey, EventList } from "./events";
 import { IpcRendererEvent, ipcRenderer } from "electron";
 
-export const send = <K extends EventKey>(key: K, params: EventList[K]) => {
+import { BridgeEventList } from "./events";
+
+export const send = <K extends keyof BridgeEventList>(
+  key: K,
+  params: BridgeEventList[K]
+) => {
   ipcRenderer.send(key, params);
 };
 
-export type Handler<K extends EventKey> = (
+export type Handler<K extends keyof BridgeEventList> = (
   event: IpcRendererEvent,
-  params: EventList[K]
+  params: BridgeEventList[K]
 ) => void;
 
-export type Listener<K extends EventKey> = (handler: Handler<K>) => () => void;
+export type Listener<K extends keyof BridgeEventList> = (
+  handler: Handler<K>
+) => () => void;
 
-export const listen = <K extends EventKey>(key: K, handler: Handler<K>) => {
+export const listen = <K extends keyof BridgeEventList>(
+  key: K,
+  handler: Handler<K>
+) => {
   ipcRenderer.on(key, handler);
   return () => {
     ipcRenderer.removeListener(key, handler);

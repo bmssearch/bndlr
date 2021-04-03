@@ -1,14 +1,16 @@
 import { EventEmitterQueue } from "../adapters/Queue";
 import { Resource } from "../models/Resource";
 
+type Listener = (
+  queued: Resource[],
+  processing: Resource[],
+  isActive: boolean
+) => void;
+
 export class ResourceInstallationWorker {
-  public start = (
-    onChange?: (
-      queued: Resource[],
-      processing: Resource[],
-      isActive: boolean
-    ) => void
-  ) => {
+  private listeners: Listener[] = [];
+
+  public start = () => {
     const queue = new EventEmitterQueue<Resource>(
       (entity, onProgress, onFinish) => {
         setTimeout(() => {
@@ -24,9 +26,9 @@ export class ResourceInstallationWorker {
             processing
           );
 
-          if (onChange) {
-            onChange(Array.from(queued), Array.from(processing), isActive);
-          }
+          this.listeners.forEach((listener) => {
+            listener(Array.from(queued), Array.from(processing), isActive);
+          });
 
           // 状態をウィンドウに通知して進捗を表示する
         },
@@ -35,5 +37,9 @@ export class ResourceInstallationWorker {
     queue.start();
 
     return queue;
+  };
+
+  public addChangeListener = (listener: Listener) => {
+    this.listeners.push(listener);
   };
 }

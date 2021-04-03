@@ -1,8 +1,8 @@
 import { DBBms } from "./models/DBBms";
+import { DBInstallationHistory } from "./models/DBInstallationHistory";
+import { DBInstallationProposal } from "./models/DBInstallationProposal";
 import { DBObservation } from "./models/DBObservation";
 import { DBResource } from "./models/DBResource";
-import { DBResourceHistory } from "./models/DBResourceHistory";
-import { DBResourceQueue } from "./models/DBResourceQueue";
 import { Sequelize } from "sequelize";
 import { migrate as rawMigrate } from "./migration";
 
@@ -14,19 +14,19 @@ export const sequelize = new Sequelize({
 DBBms.initialize(sequelize);
 DBObservation.initialize(sequelize);
 DBResource.initialize(sequelize);
-DBResourceHistory.initialize(sequelize);
-DBResourceQueue.initialize(sequelize);
+DBInstallationHistory.initialize(sequelize);
+DBInstallationProposal.initialize(sequelize);
 
 // associations
 DBBms.hasMany(DBResource, { foreignKey: "bmsId" });
 DBResource.belongsTo(DBBms, { foreignKey: "bmsId" });
 
-DBResource.hasMany(DBResourceHistory, { foreignKey: "resourceId" });
-DBResourceHistory.belongsTo(DBResource, {
+DBResource.hasMany(DBInstallationHistory, { foreignKey: "resourceId" });
+DBInstallationHistory.belongsTo(DBResource, {
   foreignKey: "resourceId",
 });
 
-DBResource.hasMany(DBResourceQueue, { foreignKey: "resourceId" });
-DBResourceQueue.belongsTo(DBResource, { foreignKey: "resourceId" });
+DBResource.hasMany(DBInstallationProposal, { foreignKey: "resourceId" });
+DBInstallationProposal.belongsTo(DBResource, { foreignKey: "resourceId" });
 
 export const migrate = () => rawMigrate(sequelize);

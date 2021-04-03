@@ -44,16 +44,3 @@ export class BmsSpec implements BmsSpecAttrs {
     });
   };
 }
-
-// const isUpToDate = (
-//   updatedAt: number | undefined,
-//   checkedAt: number | undefined
-// ): boolean => {
-//   if (checkedAt === undefined) {
-//     return false;
-//   } else if (updatedAt === undefined) {
-//     return true;
-//   } else {
-//     return updatedAt <= checkedAt;
-//   }
-// };

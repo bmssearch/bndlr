@@ -13,15 +13,18 @@ export class ContextBridgeApi {
   public requestAddBms = (specUrl: string): void => {
     send("requestAddBms", { specUrl });
   };
+
   public requestInstallResources = (resources: Resource[]): void => {
     send("requestInstallResources", { resources });
   };
 
-  public listenToResourceQueues: Listener<"updateResources"> = (handler) => {
-    return listen("updateResources", handler);
+  public listenToInstallationProposalsUpdate: Listener<"installationProposalsUpdated"> = (
+    handler
+  ) => {
+    return listen("installationProposalsUpdated", handler);
   };
 
-  public listtenToTest: Listener<"test"> = (handler) => {
+  public listenToTest: Listener<"test"> = (handler) => {
     return listen("test", handler);
   };
 }
