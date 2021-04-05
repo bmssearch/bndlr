@@ -18,7 +18,7 @@ export class BridgeEventRelay {
   }
 
   public listen = () => {
-    this.bridgeEventEmitter.on("test", (event) => {
+    this.bridgeEventEmitter.on("test", () => {
       console.log("テストだよ");
     });
 
@@ -28,9 +28,9 @@ export class BridgeEventRelay {
     });
 
     this.bridgeEventEmitter.on(
-      "requestInstallResources",
-      async (event, { resources }) => {
-        this.appEventEmitter.emit("installResources", { resources });
+      "acceptProposedInstallations",
+      async (event, { installations }) => {
+        this.appEventEmitter.emit("execInstallations", { installations });
       }
     );
   };

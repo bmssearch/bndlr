@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 
-import { Resource } from "../core/models/Resource";
+import { Installation } from "../core/models/Installation";
+import { InstallationProgress } from "../core/models/InstallationProgress";
 import { api } from "../api/api";
 import styles from "./App.module.scss";
 
@@ -9,17 +10,29 @@ const App: React.FC = () => {
     "https://venue.bmssearch.net/bmsshuin3/72"
   );
 
-  const [resources, setResources] = useState<Resource[]>([]);
+  const [installations, setInstallations] = useState<Installation[]>([]);
+  const [progressMap, setProgressMap] = useState<
+    Map<number, InstallationProgress>
+  >(new Map());
 
   const onClickButton = useCallback(() => {
     api.requestAddBms(specUrl);
   }, [specUrl]);
 
   useEffect(() => {
-    return api.listenToInstallationProposalsUpdate(
-      (e, { installationProposals }) => {
-        console.log("これが一覧だ", installationProposals);
-        setResources([]);
+    return api.listenToInstallationsUpdate((e, { installations }) => {
+      setInstallations(installations);
+    });
+  });
+
+  useEffect(() => {
+    return api.listenToInstallationProgresses(
+      (e, { installationProgresses }) => {
+        const map = new Map<number, InstallationProgress>();
+        for (const progress of installationProgresses) {
+          map.set(progress.installationId, progress);
+        }
+        setProgressMap(map);
       }
     );
   });
@@ -38,13 +51,32 @@ const App: React.FC = () => {
         value={specUrl}
         onChange={(e) => setSpecUrl(e.target.value)}
       />
-      {resources.map((res) => {
+      {installations.map((installation) => {
+        const prog = progressMap.get(installation.id);
         return (
-          <div key={res.id}>
-            <p>{res.url}</p>
-            <p>{res.type}</p>
+          <div key={installation.id}>
+            {prog && (
+              <p>
+                処理中
+                {prog.progress?.type}
+                {prog.progress?.type === "transferring" &&
+                prog.progress.totalByte
+                  ? `${
+                      (prog.progress.transferedByte * 100) /
+                      prog.progress.totalByte
+                    }%`
+                  : "-"}
+              </p>
+            )}
+            <p>{installation.resource.bms.title}</p>
+            <p>{installation.resource.url}</p>
+            <p>{installation.createdAt.toLocaleString()}</p>
+            <p>{installation.status}</p>
             <div>
-              <button onClick={() => api.requestInstallResources([res])}>
+              <button
+                disabled={!!prog}
+                onClick={() => api.acceptProposedInstallation([installation])}
+              >
                 ダウンロード
               </button>
             </div>

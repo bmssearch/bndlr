@@ -27,3 +27,7 @@ export class Extractor {
     });
   };
 }
+
+export class ExtractorFactory {
+  public create = () => new Extractor();
+}

@@ -1,13 +1,18 @@
 import { EventEmitter } from "events";
-import { Resource } from "../../../core/models/Resource";
+import { Installation } from "../../../core/models/Installation";
+import { QueueItem } from "../../../core/adapters/Queue";
+import { ResourceInstallerProgress } from "../../../core/adapters/ResourceInstaller";
 
 export interface AppEventList {
   test: Record<string, never>;
 
   addBms: { specUrl: string };
-  installResources: { resources: Resource[] };
+  execInstallations: { installations: Installation[] };
 
-  reloadInstallationProposals: Record<string, never>;
+  reloadInstallations: Record<string, never>;
+  progressOnInstallations: {
+    items: QueueItem<Installation, ResourceInstallerProgress>[];
+  };
 }
 
 export class AppEventEmitter extends EventEmitter {

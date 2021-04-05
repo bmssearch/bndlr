@@ -2,35 +2,33 @@ import { ResourceFilter, ResourceFilterConfig } from "./ResourceFilter";
 
 import { BmsRepository } from "../repositories/BmsRepository";
 import { BmsSpecRepository } from "../repositories/BmsSpecRepository";
-import { InstallationHistoryRepository } from "../repositories/InstallationHistoryRepository";
-import { InstallationProposal } from "../models/InstallationProposal";
-import { InstallationProposalRepository } from "../repositories/InstallationProposalRepository";
+import { Installation } from "../models/Installation";
+import { InstallationRepository } from "../repositories/InstallationRepository";
+import { InstallationWorker } from "../workers/InstallationWorker";
 import { ObservationRepository } from "../repositories/ObservationRepository";
-import { Queue } from "../adapters/Queue";
-import { Resource } from "../models/Resource";
 import { ResourceRepository } from "../repositories/ResourceRepository";
 import { isUpToDate } from "../utils/date";
 
 export class AppHandler {
   constructor(
-    private installationTaskQueue: Queue<Resource>,
+    private installationWorker: InstallationWorker,
+
     private bmsSpecRepository: BmsSpecRepository,
+
     private bmsRepository: BmsRepository,
     private observationRepository: ObservationRepository,
     private resourceRepoisotry: ResourceRepository,
-    private installationProposalRepoisotry: InstallationProposalRepository,
-    private installationHistoryRepoisotry: InstallationHistoryRepository
+    private installationRepoisotry: InstallationRepository
   ) {}
 
-  public putResourceIntoInstallationTaskQueue = async (resource: Resource) => {
-    this.installationTaskQueue.put(resource);
+  public putInstallationIntoTaskQueue = async (installation: Installation) => {
+    // InstallationProgressを生成
+    this.installationWorker.put(installation);
   };
 
-  public fetchInstallationProposals = async (): Promise<
-    InstallationProposal[]
-  > => {
-    const proposals = await this.installationProposalRepoisotry.list();
-    return proposals;
+  public fetchInstallations = async (): Promise<Installation[]> => {
+    const installations = await this.installationRepoisotry.list();
+    return installations;
   };
 
   public addBms = async (specUrl: string): Promise<void> => {
@@ -42,42 +40,31 @@ export class AppHandler {
         new Date()
       );
     }
-    const resourceSpecsForProposal = resourceFilter.filter(bmsSpec.resources);
+    const resourcesToBeInstalled = resourceFilter.filter(bmsSpec.resources);
 
-    for (const resourceSpec of resourceSpecsForProposal) {
+    for (const toBeInstalled of resourcesToBeInstalled) {
       // リソース自体の情報は常に更新しておく
-      const resource = await this.resourceRepoisotry.save(resourceSpec, bms.id);
+      const resource = await this.resourceRepoisotry.save(
+        toBeInstalled,
+        bms.id
+      );
 
-      // 履歴に最新のものがあったらスキップ
-      const latestHistory = await this.installationHistoryRepoisotry.fetchLatestForResource(
+      const latestInstallation = await this.installationRepoisotry.fetchLatestForResource(
         resource.id
       );
-      if (isUpToDate(resourceSpec.updatedAt, latestHistory?.checkedAt)) {
+
+      if (isUpToDate(toBeInstalled.updatedAt, latestInstallation?.createdAt)) {
         continue;
       }
 
-      // proposalsに同じものがあり、そっちのほうが新しければスキップ
-      const latestProposal = await this.installationProposalRepoisotry.fetchLatestForResource(
-        resource.id
-      );
-      if (isUpToDate(resourceSpec.updatedAt, latestProposal?.updatedAt)) {
-        continue;
-      }
-
-      if (latestProposal) {
-        // historyに移動
-        await this.installationHistoryRepoisotry.create(
-          resource.id,
-          "skipped",
-          new Date()
+      if (latestInstallation?.status === "proposed") {
+        await this.installationRepoisotry.updateStatus(
+          latestInstallation.id,
+          "skipped"
         );
-        await this.installationProposalRepoisotry.delete(latestProposal.id);
       }
 
-      await this.installationProposalRepoisotry.create(
-        resource.id,
-        resourceSpec.updatedAt
-      );
+      await this.installationRepoisotry.create(resource.id);
     }
     return;
   };

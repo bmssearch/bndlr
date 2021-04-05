@@ -23,7 +23,11 @@ export class DBObservation
           allowNull: false,
         },
       },
-      { sequelize, timestamps: false, tableName: "observations" }
+      {
+        sequelize,
+        timestamps: false,
+        tableName: "observations",
+      }
     );
   }
 

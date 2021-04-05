@@ -1,47 +1,52 @@
 import { EventEmitter } from "events";
 
-export interface Queue<T> {
+export interface QueueItem<T, P> {
+  entity: T;
+  status: "queued" | "processing";
+  progress?: P;
+}
+
+type Handler<T, P> = (
+  entity: T,
+  onProgress: (progress: P) => void,
+  onFinish: () => void
+) => void;
+
+type ChangeListener<T, M> = (
+  items: QueueItem<T, M>[],
+  isActive: boolean
+) => void;
+
+interface EventEmitterQueueConifg {
+  maxParallelProcess?: number;
+}
+
+export interface Queue<T, P> {
+  init: (handler: Handler<T, P>, config?: EventEmitterQueueConifg) => void;
+  addChangeListener: (onChnage: ChangeListener<T, P>) => void;
   put: (entity: T) => void;
   start: () => void;
   pause: () => void;
 }
 
-interface EventEmitterQueueConifg<T> {
-  maxParallelProcess?: number;
-  onChange?: (queued: Set<T>, processing: Set<T>, isActive: boolean) => void;
-}
+export class EventEmitterQueue<T, M> implements Queue<T, M> {
+  private items: Set<QueueItem<T, M>> = new Set<QueueItem<T, M>>();
+  private isActive = false;
+  private eventEmitter: EventEmitter = new EventEmitter();
 
-export class EventEmitterQueue<T> implements Queue<T> {
-  private queued: Set<T>;
-  private processing: Set<T>;
-  private isActive: boolean;
-  private eventEmitter: EventEmitter;
-  private maxParallelProcess: number;
-  private rawOnChange?: (
-    queued: Set<T>,
-    processing: Set<T>,
-    isActive: boolean
-  ) => void;
+  private handler?: Handler<T, M>;
+  private maxParallelProcess?: number;
 
-  constructor(
-    private handler: (
-      entity: T,
-      onProgress: () => void,
-      onFinish: () => void
-    ) => void,
-    config?: EventEmitterQueueConifg<T>
-  ) {
-    this.queued = new Set<T>();
-    this.processing = new Set<T>();
-    this.isActive = false;
-    this.eventEmitter = new EventEmitter();
+  private changeListeners: ChangeListener<T, M>[] = [];
+
+  public init = (handler: Handler<T, M>, config?: EventEmitterQueueConifg) => {
+    this.handler = handler;
     this.maxParallelProcess =
       config?.maxParallelProcess !== undefined ? config.maxParallelProcess : 1;
-    this.rawOnChange = config?.onChange;
-  }
+  };
 
-  public put = (entity: T) => {
-    this.queued.add(entity);
+  public put = (entity: T, metadata?: M) => {
+    this.items.add({ entity, status: "queued", progress: metadata });
     this.onChange();
 
     this.eventEmitter.emit("put");
@@ -64,35 +69,46 @@ export class EventEmitterQueue<T> implements Queue<T> {
     this.eventEmitter.removeListener("finish", this.handle);
   };
 
+  public addChangeListener = (changeHandler: ChangeListener<T, M>) => {
+    this.changeListeners.push(changeHandler);
+  };
+
   private handle = async () => {
+    const queued = Array.from(this.items).filter((v) => v.status === "queued");
+    const processing = Array.from(this.items).filter(
+      (v) => v.status === "processing"
+    );
+
     if (
       this.isActive &&
-      this.queued.size > 0 &&
-      this.processing.size < this.maxParallelProcess
+      queued.length > 0 &&
+      processing.length < (this.maxParallelProcess || 1)
     ) {
-      const entity = this.queued.values().next().value as T;
-      this.queued.delete(entity);
-      this.processing.add(entity);
+      const item = queued[0];
+      item.status = "processing";
+
       this.onChange();
 
-      this.handler(
-        entity,
-        () => {
-          console.log("progress");
-        },
-        () => {
-          this.processing.delete(entity);
-          this.onChange();
-
-          this.eventEmitter.emit("finish");
-        }
-      );
+      if (this.handler) {
+        this.handler(
+          item.entity,
+          (progress) => {
+            item.progress = progress;
+            this.onChange();
+          },
+          () => {
+            this.items.delete(item);
+            this.onChange();
+            this.eventEmitter.emit("finish");
+          }
+        );
+      }
     }
   };
 
   private onChange = () => {
-    if (this.rawOnChange) {
-      this.rawOnChange(this.queued, this.processing, this.isActive);
-    }
+    this.changeListeners.forEach((listener) => {
+      listener(Array.from(this.items), this.isActive);
+    });
   };
 }

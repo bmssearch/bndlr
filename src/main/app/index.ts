@@ -1,16 +1,24 @@
 import { BrowserWindow, app, ipcMain } from "electron";
+import {
+  ResourceInstallerFactory,
+  ResourceInstallerProgress,
+} from "../../core/adapters/ResourceInstaller";
 
+import { AppEventEmitter } from "./AppEventRouter/types";
 import { AppEventRouter } from "./AppEventRouter";
 import { AppHandler } from "../../core/app/AppHandler";
 import { BridgeEventRelay } from "./BridgeEventRelay";
-import { EventEmitter } from "events";
+import { DownloaderFactory } from "../../core/adapters/Downloader";
+import { EventEmitterQueue } from "../../core/adapters/Queue";
+import { ExtractorFactory } from "../../core/adapters/Extractor";
+import { Installation } from "../../core/models/Installation";
+import { InstallationWorker } from "../../core/workers/InstallationWorker";
 import { LocalDbBmsRepository } from "../../core/repositories/BmsRepository";
-import { LocalDbInstallationHistoryRepository } from "../../core/repositories/InstallationHistoryRepository";
-import { LocalDbInstallationProposalRepository } from "../../core/repositories/InstallationProposalRepository";
+import { LocalDbInstallationRepository } from "../../core/repositories/InstallationRepository";
 import { LocalDbObservationRepository } from "../../core/repositories/ObservationRepository";
 import { LocalDbResourceRepository } from "../../core/repositories/ResourceRepository";
 import { MockBmsSpecRepository } from "../../core/repositories/BmsSpecRepository";
-import { ResourceInstallationWorker } from "../../core/workers/ResourceInstallationWorker";
+import { TemporaryDiskProviderFactory } from "../../core/adapters/TemporaryDiskProvider";
 import { createMainWindow } from "../windows/main";
 import { initialize } from "./initialize";
 import { mockBmsSpec } from "../../__mock__/mocks";
@@ -20,28 +28,41 @@ const bmsSpecRepository = new MockBmsSpecRepository(mockBmsSpec);
 const bmsRepository = new LocalDbBmsRepository();
 const observationRepository = new LocalDbObservationRepository();
 const resourceRepoisotry = new LocalDbResourceRepository();
-const installationProposalRepoisotry = new LocalDbInstallationProposalRepository();
-const installationHistoryRepoisotry = new LocalDbInstallationHistoryRepository();
+const installationRepository = new LocalDbInstallationRepository();
+
+const tpdFactory = new TemporaryDiskProviderFactory();
+const downloaderFactory = new DownloaderFactory();
+const extractorFactory = new ExtractorFactory();
+const resourceInstallerFactory = new ResourceInstallerFactory(
+  tpdFactory,
+  downloaderFactory,
+  extractorFactory
+);
 
 export const onAppReady = async () => {
   await initialize();
 
-  const resourceInstallationWorker = new ResourceInstallationWorker();
-  const resourceInstallationQueue = resourceInstallationWorker.start();
+  const installationQueue = new EventEmitterQueue<
+    Installation,
+    ResourceInstallerProgress
+  >();
+  const installationWorker = new InstallationWorker(
+    installationQueue,
+    resourceInstallerFactory
+  );
 
   const handler = new AppHandler(
-    resourceInstallationQueue,
+    installationWorker,
 
     bmsSpecRepository,
 
     bmsRepository,
     observationRepository,
     resourceRepoisotry,
-    installationProposalRepoisotry,
-    installationHistoryRepoisotry
+    installationRepository
   );
 
-  const appEventEmitter = new EventEmitter();
+  const appEventEmitter = new AppEventEmitter();
   const rendererEventEmitter = ipcMain;
 
   const relay = new BridgeEventRelay(rendererEventEmitter, appEventEmitter);
@@ -50,9 +71,10 @@ export const onAppReady = async () => {
   const router = new AppEventRouter(appEventEmitter, handler, relay);
   router.listen();
 
-  resourceInstallationWorker.addChangeListener(() => {
-    console.log("CHANGE");
+  installationWorker.addChangeListener((items) => {
+    appEventEmitter.emit("progressOnInstallations", { items });
   });
+  installationWorker.start();
 
   setTray();
   createMainWindow(relay);

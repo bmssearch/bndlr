@@ -8,7 +8,7 @@ export const migrator: Migrator = {
       "bmses",
       {
         id: {
-          type: DataTypes.INTEGER.UNSIGNED,
+          type: DataTypes.INTEGER,
           allowNull: false,
           primaryKey: true,
           autoIncrement: true,
@@ -19,6 +19,10 @@ export const migrator: Migrator = {
         },
         domainScopedId: {
           type: DataTypes.STRING,
+          allowNull: false,
+        },
+        title: {
+          type: DataTypes.STRING(4096),
           allowNull: false,
         },
         specUrl: {
@@ -57,22 +61,27 @@ export const migrator: Migrator = {
         bmsId: {
           type: DataTypes.INTEGER,
           allowNull: false,
-          references: { model: "bmses", key: "id" },
+          unique: "urlWithBmsId",
         },
         url: {
           type: DataTypes.STRING(4096),
           allowNull: false,
+          unique: "urlWithBmsId",
         },
         type: {
           type: DataTypes.ENUM,
           values: ["core", "patch", "additional"],
           allowNull: false,
         },
+        updatedAt: {
+          type: DataTypes.DATE,
+          allowNull: true,
+        },
       },
       { uniqueKeys: { urlWithBmsId: { fields: ["bmsId", "url"] } } }
     );
 
-    await qi.createTable("installation_proposals", {
+    await qi.createTable("installations", {
       id: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -82,32 +91,17 @@ export const migrator: Migrator = {
       resourceId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: "resources", key: "id" },
       },
-      updatedAt: {
-        type: DataTypes.DATE,
-        allowNull: true,
-      },
-    });
-
-    await qi.createTable("installation_histories", {
-      id: {
-        type: DataTypes.INTEGER.UNSIGNED,
-        allowNull: false,
-        primaryKey: true,
-        autoIncrement: true,
-      },
-      resourceId: {
-        type: DataTypes.INTEGER.UNSIGNED,
-        allowNull: false,
-        references: { model: "resources", key: "id" },
-      },
-      result: {
+      status: {
         type: DataTypes.ENUM,
-        values: ["installed", "failed", "skipped"],
+        values: ["proposed", "installed", "failed", "skipped"],
         allowNull: false,
       },
       checkedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      createdAt: {
         type: DataTypes.DATE,
         allowNull: false,
       },
@@ -117,7 +111,6 @@ export const migrator: Migrator = {
     await qi.dropTable("bmses");
     await qi.dropTable("observations");
     await qi.dropTable("resources");
-    await qi.dropTable("installation_proposals");
-    await qi.dropTable("installation_histories");
+    await qi.dropTable("installations");
   },
 };

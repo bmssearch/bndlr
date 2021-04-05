@@ -6,6 +6,7 @@ export interface BmsSpecAttrs {
   specUrl: string;
   domain: string;
   domainScopedId: string;
+  title: string;
   websiteUrl?: string;
   groupSpecUrl?: string;
   updatesSpecUrl?: string;
@@ -16,6 +17,7 @@ export class BmsSpec implements BmsSpecAttrs {
   public specUrl: string;
   public domain: string;
   public domainScopedId: string;
+  public title: string;
   public websiteUrl?: string;
   public groupSpecUrl?: string;
   public updatesSpecUrl?: string;
@@ -25,6 +27,7 @@ export class BmsSpec implements BmsSpecAttrs {
     this.specUrl = attrs.specUrl;
     this.domain = attrs.domain;
     this.domainScopedId = attrs.domainScopedId;
+    this.title = attrs.title;
     this.websiteUrl = attrs.websiteUrl;
     this.groupSpecUrl = attrs.groupSpecUrl;
     this.updatesSpecUrl = attrs.updatesSpecUrl;
@@ -37,6 +40,7 @@ export class BmsSpec implements BmsSpecAttrs {
       specUrl,
       domain: urlDomain(specUrl),
       domainScopedId: spec.id,
+      title: "dummy title",
       websiteUrl: spec.website_url,
       groupSpecUrl: spec.group_url,
       updatesSpecUrl: spec.updates_url,

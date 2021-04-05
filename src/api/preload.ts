@@ -1,5 +1,6 @@
 import { Listener, listen, send } from "./helpers";
 
+import { Installation } from "../core/models/Installation";
 import { Resource } from "../core/models/Resource";
 import { contextBridge } from "electron";
 
@@ -14,14 +15,20 @@ export class ContextBridgeApi {
     send("requestAddBms", { specUrl });
   };
 
-  public requestInstallResources = (resources: Resource[]): void => {
-    send("requestInstallResources", { resources });
+  public acceptProposedInstallation = (installations: Installation[]): void => {
+    send("acceptProposedInstallations", { installations });
   };
 
-  public listenToInstallationProposalsUpdate: Listener<"installationProposalsUpdated"> = (
+  public listenToInstallationsUpdate: Listener<"installationsUpdated"> = (
     handler
   ) => {
-    return listen("installationProposalsUpdated", handler);
+    return listen("installationsUpdated", handler);
+  };
+
+  public listenToInstallationProgresses: Listener<"installationProgressesUpdated"> = (
+    handler
+  ) => {
+    return listen("installationProgressesUpdated", handler);
   };
 
   public listenToTest: Listener<"test"> = (handler) => {

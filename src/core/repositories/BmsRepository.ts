@@ -23,6 +23,7 @@ export class LocalDbBmsRepository implements BmsRepository {
       dbBms = await DBBms.create({
         domain: bms.domain,
         domainScopedId: bms.domainScopedId,
+        title: bms.title,
         specUrl: bms.specUrl,
         checkedAt,
       });
