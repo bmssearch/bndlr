@@ -1,4 +1,6 @@
 import { BmsSpec } from "../core/models/BmsSpec";
+import { GroupManifest } from "../core/models/GroupManifest";
+import { UpdatesManifest } from "../core/models/UpdatesManifest";
 
 export const mockBmsSpec: BmsSpec = {
   specUrl: "specURL",
@@ -58,3 +60,39 @@ export const mockBbsBmsSpec = {
     },
   ],
 };
+
+export const mockGroupManifest = new GroupManifest({
+  manifestUrl: "https://bmssearch.net/aa",
+  domain: "bmssearch.net",
+  domainScopedId: "id in bmssearch.ent",
+  name: "すごいプレイリスト",
+  websiteUrl: "website",
+  updatesManifestUrl: "erer",
+  bmses: [
+    {
+      domain: "bmssearch.net",
+      domainScopedId: "aer",
+      manifestUrl: "werwerwre",
+    },
+  ],
+});
+
+export const mockUpdatesManifest = new UpdatesManifest({
+  timestamp: new Date(),
+  bmses: [
+    {
+      domain: "bmssearch.net",
+      domainScopedId: "id",
+      manifestUrl: "https://bmssearch.net/werwer",
+      domainScopedGroupId: "werwer",
+      updatedAt: new Date(),
+    },
+    {
+      domain: "venue.bmssearch.net",
+      domainScopedId: "test_id3",
+      manifestUrl: "https://bmssearch.net/werwer",
+      domainScopedGroupId: "werwer",
+      updatedAt: new Date(),
+    },
+  ],
+});

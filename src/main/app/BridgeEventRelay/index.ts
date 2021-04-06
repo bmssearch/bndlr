@@ -23,8 +23,18 @@ export class BridgeEventRelay {
     });
 
     this.bridgeEventEmitter.on("requestAddBms", async (event, { specUrl }) => {
-      console.log("request add bms");
       this.appEventEmitter.emit("addBms", { specUrl });
+    });
+
+    this.bridgeEventEmitter.on(
+      "requestAddGroup",
+      async (event, { manifestUrl }) => {
+        this.appEventEmitter.emit("addGroup", { manifestUrl });
+      }
+    );
+
+    this.bridgeEventEmitter.on("requestCheckUpdates", async () => {
+      this.appEventEmitter.emit("checkUpdates", {});
     });
 
     this.bridgeEventEmitter.on(

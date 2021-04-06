@@ -1,5 +1,7 @@
 import { DataTypes, Model, Sequelize } from "sequelize";
 
+import { Observation } from "../../../../core/models/Observation";
+
 export interface DBObservationAttrs {
   specUrl: string;
   checkedAt: Date;
@@ -30,6 +32,13 @@ export class DBObservation
       }
     );
   }
+
+  public toObservation = () => {
+    return new Observation({
+      specUrl: this.specUrl,
+      checkedAt: this.checkedAt,
+    });
+  };
 
   public specUrl!: string;
   public checkedAt!: Date;

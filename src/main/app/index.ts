@@ -3,10 +3,14 @@ import {
   ResourceInstallerFactory,
   ResourceInstallerProgress,
 } from "../../core/adapters/ResourceInstaller";
+import {
+  mockBmsSpec,
+  mockGroupManifest,
+  mockUpdatesManifest,
+} from "../../__mock__/mocks";
 
 import { AppEventEmitter } from "./AppEventRouter/types";
 import { AppEventRouter } from "./AppEventRouter";
-import { AppHandler } from "../../core/app/AppHandler";
 import { BridgeEventRelay } from "./BridgeEventRelay";
 import { DownloaderFactory } from "../../core/adapters/Downloader";
 import { EventEmitterQueue } from "../../core/adapters/Queue";
@@ -14,18 +18,29 @@ import { ExtractorFactory } from "../../core/adapters/Extractor";
 import { Installation } from "../../core/models/Installation";
 import { InstallationWorker } from "../../core/workers/InstallationWorker";
 import { LocalDbBmsRepository } from "../../core/repositories/BmsRepository";
+import { LocalDbGroupRepository } from "../../core/repositories/GroupRepository";
 import { LocalDbInstallationRepository } from "../../core/repositories/InstallationRepository";
 import { LocalDbObservationRepository } from "../../core/repositories/ObservationRepository";
 import { LocalDbResourceRepository } from "../../core/repositories/ResourceRepository";
 import { MockBmsSpecRepository } from "../../core/repositories/BmsSpecRepository";
+import { MockGroupManifestRepository } from "../../core/repositories/GroupManifestRepository";
+import { MockUpdatesManifestRepository } from "../../core/repositories/UpdatesManifestRepository";
+import { Service } from "../../core/app/Service";
 import { TemporaryDiskProviderFactory } from "../../core/adapters/TemporaryDiskProvider";
 import { createMainWindow } from "../windows/main";
 import { initialize } from "./initialize";
-import { mockBmsSpec } from "../../__mock__/mocks";
 import { setTray } from "../windows/tray";
 
 const bmsSpecRepository = new MockBmsSpecRepository(mockBmsSpec);
+const groupManifestRepository = new MockGroupManifestRepository(
+  mockGroupManifest
+);
+const updatesManifestRepository = new MockUpdatesManifestRepository(
+  mockUpdatesManifest
+);
+
 const bmsRepository = new LocalDbBmsRepository();
+const groupRepository = new LocalDbGroupRepository();
 const observationRepository = new LocalDbObservationRepository();
 const resourceRepoisotry = new LocalDbResourceRepository();
 const installationRepository = new LocalDbInstallationRepository();
@@ -51,12 +66,15 @@ export const onAppReady = async () => {
     resourceInstallerFactory
   );
 
-  const handler = new AppHandler(
+  const service = new Service(
     installationWorker,
 
     bmsSpecRepository,
+    groupManifestRepository,
+    updatesManifestRepository,
 
     bmsRepository,
+    groupRepository,
     observationRepository,
     resourceRepoisotry,
     installationRepository
@@ -68,11 +86,17 @@ export const onAppReady = async () => {
   const relay = new BridgeEventRelay(rendererEventEmitter, appEventEmitter);
   relay.listen();
 
-  const router = new AppEventRouter(appEventEmitter, handler, relay);
+  const router = new AppEventRouter(appEventEmitter, service, relay);
   router.listen();
 
   installationWorker.addChangeListener((items) => {
     appEventEmitter.emit("progressOnInstallations", { items });
+  });
+  installationWorker.addFinishListener((installationId) => {
+    appEventEmitter.emit("finishInstallation", { installationId });
+  });
+  installationWorker.addErrorListener((installationId) => {
+    appEventEmitter.emit("failInstallation", { installationId });
   });
   installationWorker.start();
 

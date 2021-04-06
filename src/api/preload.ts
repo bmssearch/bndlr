@@ -15,6 +15,14 @@ export class ContextBridgeApi {
     send("requestAddBms", { specUrl });
   };
 
+  public requestAddGroup = (manifestUrl: string): void => {
+    send("requestAddGroup", { manifestUrl });
+  };
+
+  public requestCheckUpdates = () => {
+    send("requestCheckUpdates", {});
+  };
+
   public acceptProposedInstallation = (installations: Installation[]): void => {
     send("acceptProposedInstallations", { installations });
   };

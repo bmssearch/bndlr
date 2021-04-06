@@ -1,13 +1,13 @@
 import { AppEventEmitter } from "./types";
-import { AppHandler } from "../../../core/app/AppHandler";
 import { BridgeEventRelay } from "../BridgeEventRelay";
 import { InstallationProgress } from "../../../core/models/InstallationProgress";
+import { Service } from "../../../core/app/Service";
 import { throttle } from "throttle-debounce";
 
 export class AppEventRouter {
   constructor(
     private emitter: AppEventEmitter,
-    private appHandler: AppHandler,
+    private service: Service,
     private relay: BridgeEventRelay
   ) {}
 
@@ -15,19 +15,27 @@ export class AppEventRouter {
     this.emitter.removeAllListeners();
 
     this.emitter.on("addBms", async ({ specUrl }) => {
-      console.log("add Bms");
-      await this.appHandler.addBms(specUrl);
+      await this.service.addBms(specUrl);
       this.emitter.emit("reloadInstallations", {});
+    });
+
+    this.emitter.on("addGroup", async ({ manifestUrl }) => {
+      await this.service.addGroup(manifestUrl);
+      this.emitter.emit("reloadInstallations", {});
+    });
+
+    this.emitter.on("checkUpdates", async () => {
+      await this.service.checkUpdates();
     });
 
     this.emitter.on("execInstallations", ({ installations }) => {
       installations.forEach((installation) => {
-        this.appHandler.putInstallationIntoTaskQueue(installation);
+        this.service.putInstallationIntoTaskQueue(installation);
       });
     });
 
     this.emitter.on("reloadInstallations", async () => {
-      const installations = await this.appHandler.fetchInstallations();
+      const installations = await this.service.fetchInstallations();
       this.relay.deliver("installationsUpdated", {
         installations,
       });
@@ -35,7 +43,7 @@ export class AppEventRouter {
 
     this.emitter.on(
       "progressOnInstallations",
-      throttle(80, true, async ({ items }) => {
+      throttle(80, async ({ items }) => {
         const installationProgresses = items.map((item) => {
           const installationId = item.entity.id;
           if (item.status === "queued") {
@@ -84,5 +92,15 @@ export class AppEventRouter {
         });
       })
     );
+
+    this.emitter.on("finishInstallation", async ({ installationId }) => {
+      await this.service.updateInstallationStatus(installationId, "installed");
+      this.emitter.emit("reloadInstallations", {});
+    });
+
+    this.emitter.on("failInstallation", async ({ installationId }) => {
+      await this.service.updateInstallationStatus(installationId, "failed");
+      this.emitter.emit("reloadInstallations", {});
+    });
   };
 }

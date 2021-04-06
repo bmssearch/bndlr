@@ -83,7 +83,9 @@ const App: React.FC = () => {
           </div>
         );
       })}
-      <button onClick={onClickButton}>BUTTON</button>
+      <button onClick={onClickButton}>Add Bms</button>
+      <button onClick={() => api.requestAddGroup("test")}>Add Group</button>
+      <button onClick={() => api.requestCheckUpdates()}>Check Updates</button>
       <button onClick={() => api.test()}>TEST</button>
     </div>
   );

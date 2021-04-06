@@ -7,12 +7,16 @@ export interface AppEventList {
   test: Record<string, never>;
 
   addBms: { specUrl: string };
+  addGroup: { manifestUrl: string };
+  checkUpdates: Record<string, never>;
   execInstallations: { installations: Installation[] };
 
   reloadInstallations: Record<string, never>;
   progressOnInstallations: {
     items: QueueItem<Installation, ResourceInstallerProgress>[];
   };
+  finishInstallation: { installationId: number };
+  failInstallation: { installationId: number };
 }
 
 export class AppEventEmitter extends EventEmitter {

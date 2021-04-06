@@ -50,6 +50,41 @@ export const migrator: Migrator = {
     });
 
     await qi.createTable(
+      "groups",
+      {
+        id: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          primaryKey: true,
+          autoIncrement: true,
+        },
+        domain: {
+          type: DataTypes.STRING(4096),
+          allowNull: false,
+          unique: "idWithDomain",
+        },
+        domainScopedId: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          unique: "idWithDomain",
+        },
+        manifestUrl: {
+          type: DataTypes.STRING(4096),
+          allowNull: false,
+        },
+        name: {
+          type: DataTypes.STRING(4096),
+          allowNull: false,
+        },
+        autoAddNewBmses: {
+          type: DataTypes.BOOLEAN,
+          allowNull: false,
+        },
+      },
+      { uniqueKeys: { idWithDomain: { fields: ["domain", "domainScopedId"] } } }
+    );
+
+    await qi.createTable(
       "resources",
       {
         id: {
@@ -110,6 +145,7 @@ export const migrator: Migrator = {
   down: async ({ context: qi }) => {
     await qi.dropTable("bmses");
     await qi.dropTable("observations");
+    await qi.dropTable("groups");
     await qi.dropTable("resources");
     await qi.dropTable("installations");
   },

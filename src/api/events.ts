@@ -6,6 +6,9 @@ export interface BridgeEventList {
   test: Record<string, never>;
 
   requestAddBms: { specUrl: string };
+  requestAddGroup: { manifestUrl: string };
+  requestCheckUpdates: Record<string, never>;
+
   acceptProposedInstallations: { installations: Installation[] };
 
   installationsUpdated: {

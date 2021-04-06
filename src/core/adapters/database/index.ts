@@ -1,4 +1,5 @@
 import { DBBms } from "./models/DBBms";
+import { DBGroup } from "./models/DBGroup";
 import { DBInstallation } from "./models/DBInstallation";
 import { DBObservation } from "./models/DBObservation";
 import { DBResource } from "./models/DBResource";
@@ -12,6 +13,7 @@ export const sequelize = new Sequelize({
 
 DBBms.initialize(sequelize);
 DBObservation.initialize(sequelize);
+DBGroup.initialize(sequelize);
 DBResource.initialize(sequelize);
 DBInstallation.initialize(sequelize);
 
