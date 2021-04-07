@@ -4,7 +4,7 @@ import {
   ResourceInstallerProgress,
 } from "../../core/adapters/ResourceInstaller";
 import {
-  mockBmsSpec,
+  mockBmsManifest,
   mockGroupManifest,
   mockUpdatesManifest,
 } from "../../__mock__/mocks";
@@ -25,7 +25,7 @@ import { LocalDbGroupRepository } from "../../core/repositories/GroupRepository"
 import { LocalDbInstallationRepository } from "../../core/repositories/InstallationRepository";
 import { LocalDbObservationRepository } from "../../core/repositories/ObservationRepository";
 import { LocalDbResourceRepository } from "../../core/repositories/ResourceRepository";
-import { MockBmsSpecRepository } from "../../core/repositories/BmsSpecRepository";
+import { MockBmsManifestRepository } from "../../core/repositories/BmsManifestRepository";
 import { MockGroupManifestRepository } from "../../core/repositories/GroupManifestRepository";
 import { MockUpdatesManifestRepository } from "../../core/repositories/UpdatesManifestRepository";
 import { ObservationRegistrar } from "../../core/app/ObservationRegistrar";
@@ -36,7 +36,7 @@ import { createMainWindow } from "../windows/main";
 import { initialize } from "./initialize";
 import { setTray } from "../windows/tray";
 
-const bmsSpecRepository = new MockBmsSpecRepository(mockBmsSpec);
+const bmsManifestRepository = new MockBmsManifestRepository(mockBmsManifest);
 const groupManifestRepository = new MockGroupManifestRepository(
   mockGroupManifest
 );
@@ -52,7 +52,7 @@ const resourceRepoisotry = new LocalDbResourceRepository();
 const installationRepository = new LocalDbInstallationRepository();
 
 const bmsRegistrar = new BmsRegistrar(
-  bmsSpecRepository,
+  bmsManifestRepository,
   bmsRepository,
   bmsCheckRepository
 );
@@ -90,7 +90,7 @@ export const onAppReady = async () => {
   const service = new Service(
     installationWorker,
 
-    bmsSpecRepository,
+    bmsManifestRepository,
     groupManifestRepository,
     updatesManifestRepository,
 

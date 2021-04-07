@@ -1,14 +1,14 @@
 export interface ObservationAttrs {
-  specUrl: string;
+  manifestUrl: string;
   checkedAt: Date;
 }
 
 export class Observation implements ObservationAttrs {
-  public specUrl: string;
+  public manifestUrl: string;
   public checkedAt: Date;
 
   constructor(attrs: ObservationAttrs) {
-    this.specUrl = attrs.specUrl;
+    this.manifestUrl = attrs.manifestUrl;
     this.checkedAt = attrs.checkedAt;
   }
 }

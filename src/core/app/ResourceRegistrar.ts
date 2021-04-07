@@ -1,6 +1,6 @@
 import { InstallationRepository } from "../repositories/InstallationRepository";
+import { ResourceManifest } from "../models/ResourceManifest";
 import { ResourceRepository } from "../repositories/ResourceRepository";
-import { ResourceSpec } from "../models/ResourceSpec";
 import { isUpToDate } from "../utils/date";
 
 export class ResourceRegistrar {
@@ -9,7 +9,10 @@ export class ResourceRegistrar {
     private installationRepository: InstallationRepository
   ) {}
 
-  public register = async (resourceManifest: ResourceSpec, bmsId: number) => {
+  public register = async (
+    resourceManifest: ResourceManifest,
+    bmsId: number
+  ) => {
     // リソース自体の情報は常に更新しておく
     const resource = await this.resourceRepository.save(
       resourceManifest,

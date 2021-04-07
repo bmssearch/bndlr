@@ -18,9 +18,12 @@ export class BridgeEventRelay {
       console.log("テストだよ");
     });
 
-    this.bridgeEventEmitter.on("requestAddBms", async (event, { specUrl }) => {
-      this.appEventEmitter.emit("addBms", { specUrl });
-    });
+    this.bridgeEventEmitter.on(
+      "requestAddBms",
+      async (event, { manifestUrl }) => {
+        this.appEventEmitter.emit("addBms", { manifestUrl });
+      }
+    );
 
     this.bridgeEventEmitter.on(
       "requestAddGroup",

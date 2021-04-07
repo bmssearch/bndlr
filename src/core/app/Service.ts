@@ -6,9 +6,9 @@ import { Installation, InstallationStatus } from "../models/Installation";
 import { ResourceFilter, ResourceFilterConfig } from "./ResourceFilter";
 
 import { BmsCheckRepository } from "../repositories/BmsCheckRepository";
+import { BmsManifestRepository } from "../repositories/BmsManifestRepository";
 import { BmsRegistrar } from "./BmsRegistrar";
 import { BmsRepository } from "../repositories/BmsRepository";
-import { BmsSpecRepository } from "../repositories/BmsSpecRepository";
 import { GroupManifestRepository } from "../repositories/GroupManifestRepository";
 import { GroupRegistrar } from "./GroupRegistrar";
 import { GroupRepository } from "../repositories/GroupRepository";
@@ -25,7 +25,7 @@ export class Service {
   constructor(
     private installationWorker: InstallationWorker,
 
-    private bmsManifestRepository: BmsSpecRepository,
+    private bmsManifestRepository: BmsManifestRepository,
     private groupManifestRepository: GroupManifestRepository,
     private updatesManifestRepository: UpdatesManifestRepository,
 
@@ -114,7 +114,7 @@ export class Service {
     const observations = await this.observationRepository.list();
     for (const observation of observations) {
       const updates = await this.updatesManifestRepository.fetch(
-        observation.specUrl
+        observation.manifestUrl
       );
 
       if (!updates.bmses) continue;

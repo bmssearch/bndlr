@@ -3,7 +3,7 @@ import { DataTypes, Model, Sequelize } from "sequelize";
 import { Observation } from "../../../../core/models/Observation";
 
 export interface DBObservationAttrs {
-  specUrl: string;
+  manifestUrl: string;
   checkedAt: Date;
 }
 
@@ -15,7 +15,7 @@ export class DBObservation
   static initialize(sequelize: Sequelize) {
     return this.init(
       {
-        specUrl: {
+        manifestUrl: {
           type: DataTypes.STRING(4096),
           allowNull: false,
           primaryKey: true,
@@ -35,11 +35,11 @@ export class DBObservation
 
   public toObservation = () => {
     return new Observation({
-      specUrl: this.specUrl,
+      manifestUrl: this.manifestUrl,
       checkedAt: this.checkedAt,
     });
   };
 
-  public specUrl!: string;
+  public manifestUrl!: string;
   public checkedAt!: Date;
 }

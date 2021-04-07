@@ -3,7 +3,10 @@ import { Observation } from "../models/Observation";
 
 export interface ObservationRepository {
   list: () => Promise<Observation[]>;
-  createOrIgnore: (updatesSpecUrl: string, checkedAt: Date) => Promise<void>;
+  createOrIgnore: (
+    updatesManifestUrl: string,
+    checkedAt: Date
+  ) => Promise<void>;
 }
 
 export class LocalDbObservationRepository implements ObservationRepository {
@@ -12,11 +15,14 @@ export class LocalDbObservationRepository implements ObservationRepository {
     return observations.map((v) => v.toObservation());
   };
 
-  public createOrIgnore = async (updatesSpecUrl: string, checkedAt: Date) => {
+  public createOrIgnore = async (
+    updatesManifestUrl: string,
+    checkedAt: Date
+  ) => {
     await DBObservation.findOrCreate({
-      where: { specUrl: updatesSpecUrl },
+      where: { manifestUrl: updatesManifestUrl },
       defaults: {
-        specUrl: updatesSpecUrl,
+        manifestUrl: updatesManifestUrl,
         checkedAt,
       },
     });

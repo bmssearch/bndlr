@@ -47,7 +47,7 @@ export const migrator: Migrator = {
     });
 
     await qi.createTable("observations", {
-      specUrl: {
+      manifestUrl: {
         type: DataTypes.STRING(4096),
         allowNull: false,
         primaryKey: true,

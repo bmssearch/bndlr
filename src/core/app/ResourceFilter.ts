@@ -1,4 +1,4 @@
-import { ResourceSpec } from "../models/ResourceSpec";
+import { ResourceManifest } from "../models/ResourceManifest";
 
 type ResourceFilterCoreMethod = "first" | "latest";
 
@@ -17,8 +17,8 @@ export interface ResourceFilterConfig {
 export class ResourceFilter {
   constructor(private config: ResourceFilterConfig) {}
 
-  public filter = (resources: ResourceSpec[]) => {
-    const filteredResources: ResourceSpec[] = [];
+  public filter = (resources: ResourceManifest[]) => {
+    const filteredResources: ResourceManifest[] = [];
 
     const coreResources = resources.filter((res) => res.type === "core");
     if (coreResources.length > 0) {

@@ -5,18 +5,18 @@ import {
 } from "../models/Identity";
 
 import { BmsCheckRepository } from "../repositories/BmsCheckRepository";
+import { BmsManifest } from "../models/BmsManifest";
+import { BmsManifestRepository } from "../repositories/BmsManifestRepository";
 import { BmsRepository } from "../repositories/BmsRepository";
-import { BmsSpec } from "../models/BmsSpec";
-import { BmsSpecRepository } from "../repositories/BmsSpecRepository";
 
 export class BmsRegistrar {
   constructor(
-    private bmsManifestRepository: BmsSpecRepository,
+    private bmsManifestRepository: BmsManifestRepository,
     private bmsRepository: BmsRepository,
     private bmsCheckRepository: BmsCheckRepository
   ) {}
 
-  public register = async (bmsManifest: BmsSpec) => {
+  public register = async (bmsManifest: BmsManifest) => {
     const cdIdentifierFactory = new CrossDomainIdentifierFactory([
       ["bmssearch.net", "venue.bmssearch.net", "ringo.com"],
     ]);

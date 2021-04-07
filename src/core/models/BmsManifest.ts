@@ -1,30 +1,30 @@
 import { Bms as BbsBms } from "@bmssearch/bms-bundle-spec";
-import { ResourceSpec } from "./ResourceSpec";
+import { ResourceManifest } from "./ResourceManifest";
 import { urlDomain } from "../utils/url";
 
-export interface BmsSpecAttrs {
-  specUrl: string;
+export interface BmsManifestAttrs {
+  manifestUrl: string;
   domain: string;
   domainScopedId: string;
   title: string;
   websiteUrl?: string;
   groupManifestUrl?: string;
   updatesManifestUrl?: string;
-  resources: ResourceSpec[];
+  resources: ResourceManifest[];
 }
 
-export class BmsSpec implements BmsSpecAttrs {
-  public specUrl: string;
+export class BmsManifest implements BmsManifestAttrs {
+  public manifestUrl: string;
   public domain: string;
   public domainScopedId: string;
   public title: string;
   public websiteUrl?: string;
   public groupManifestUrl?: string;
   public updatesManifestUrl?: string;
-  public resources: ResourceSpec[];
+  public resources: ResourceManifest[];
 
-  constructor(attrs: BmsSpecAttrs) {
-    this.specUrl = attrs.specUrl;
+  constructor(attrs: BmsManifestAttrs) {
+    this.manifestUrl = attrs.manifestUrl;
     this.domain = attrs.domain;
     this.domainScopedId = attrs.domainScopedId;
     this.title = attrs.title;
@@ -34,11 +34,13 @@ export class BmsSpec implements BmsSpecAttrs {
     this.resources = attrs.resources;
   }
 
-  public static fromSpec = (specUrl: string, spec: BbsBms): BmsSpec => {
-    const resources = spec.resources.map((res) => ResourceSpec.fromSpec(res));
-    return new BmsSpec({
-      specUrl,
-      domain: urlDomain(specUrl),
+  public static fromSpec = (manifestUrl: string, spec: BbsBms): BmsManifest => {
+    const resources = spec.resources.map((res) =>
+      ResourceManifest.fromSpec(res)
+    );
+    return new BmsManifest({
+      manifestUrl,
+      domain: urlDomain(manifestUrl),
       domainScopedId: spec.id,
       title: "dummy title",
       websiteUrl: spec.website_url,

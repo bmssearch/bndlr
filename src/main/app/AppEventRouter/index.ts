@@ -14,8 +14,8 @@ export class AppEventRouter {
   public listen = () => {
     this.emitter.removeAllListeners();
 
-    this.emitter.on("addBms", async ({ specUrl }) => {
-      await this.service.addBms(specUrl);
+    this.emitter.on("addBms", async ({ manifestUrl }) => {
+      await this.service.addBms(manifestUrl);
       this.emitter.emit("reloadInstallations", {});
     });
 

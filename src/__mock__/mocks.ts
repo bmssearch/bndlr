@@ -1,9 +1,9 @@
-import { BmsSpec } from "../core/models/BmsSpec";
+import { BmsManifest } from "../core/models/BmsManifest";
 import { GroupManifest } from "../core/models/GroupManifest";
 import { UpdatesManifest } from "../core/models/UpdatesManifest";
 
-export const mockBmsSpec: BmsSpec = {
-  specUrl: "specURL",
+export const mockBmsManifest: BmsManifest = {
+  manifestUrl: "manifestUrl",
   domain: "venue.bmssearch.net",
   domainScopedId: "test_id3",
   title: "Falling Cxte",
@@ -32,7 +32,7 @@ export const mockBmsSpec: BmsSpec = {
   ],
 };
 
-export const mockBbsBmsSpec = {
+export const mockBbsBmsManifest = {
   version: 1,
 
   id: "test_id3",

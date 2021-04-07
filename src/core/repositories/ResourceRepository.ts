@@ -1,11 +1,11 @@
 import { DBBms } from "../adapters/database/models/DBBms";
 import { DBResource } from "../adapters/database/models/DBResource";
 import { Resource } from "../models/Resource";
-import { ResourceSpec } from "../models/ResourceSpec";
+import { ResourceManifest } from "../models/ResourceManifest";
 
 export interface ResourceRepository {
   fetch: (bmsId: number, url: string) => Promise<Resource | null>;
-  save: (Resource: ResourceSpec, bmsId: number) => Promise<Resource>;
+  save: (Resource: ResourceManifest, bmsId: number) => Promise<Resource>;
 }
 
 export class LocalDbResourceRepository implements ResourceRepository {
@@ -20,7 +20,7 @@ export class LocalDbResourceRepository implements ResourceRepository {
     return dbResource ? dbResource.toResource(bms) : null;
   };
 
-  public save = async (resource: ResourceSpec, bmsId: number) => {
+  public save = async (resource: ResourceManifest, bmsId: number) => {
     // bmsId と urlがともに一致するものを同一とみなす
 
     const dbBms = await DBBms.findByPk(bmsId);

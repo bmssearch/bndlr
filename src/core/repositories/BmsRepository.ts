@@ -1,15 +1,15 @@
 import { Op, WhereOptions } from "sequelize";
 
 import { Bms } from "../models/Bms";
-import { BmsSpec } from "../models/BmsSpec";
+import { BmsManifest } from "../models/BmsManifest";
 import { DBBms } from "../adapters/database/models/DBBms";
 import { Identifier } from "../models/Identity";
 
 export interface BmsRepository {
   list: (identifiers: Identifier[]) => Promise<Bms[]>;
 
-  update: (id: number, bmsManifest: BmsSpec) => Promise<void>;
-  create: (bmsManifest: BmsSpec) => Promise<Bms>;
+  update: (id: number, bmsManifest: BmsManifest) => Promise<void>;
+  create: (bmsManifest: BmsManifest) => Promise<Bms>;
 }
 
 export class LocalDbBmsRepository implements BmsRepository {
@@ -19,11 +19,11 @@ export class LocalDbBmsRepository implements BmsRepository {
     return dbBmses.map((v) => v.toBms());
   };
 
-  public update = async (id: number, bmsManifest: BmsSpec) => {
+  public update = async (id: number, bmsManifest: BmsManifest) => {
     await DBBms.update({ title: bmsManifest.title }, { where: { id } });
   };
 
-  public create = async (bmsManifest: BmsSpec): Promise<Bms> => {
+  public create = async (bmsManifest: BmsManifest): Promise<Bms> => {
     const dbBms = await DBBms.create({
       domain: bmsManifest.domain,
       domainScopedId: bmsManifest.domainScopedId,

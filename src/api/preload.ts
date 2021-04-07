@@ -1,7 +1,6 @@
 import { Listener, listen, send } from "./helpers";
 
 import { Installation } from "../core/models/Installation";
-import { Resource } from "../core/models/Resource";
 import { contextBridge } from "electron";
 
 export class ContextBridgeApi {
@@ -11,8 +10,8 @@ export class ContextBridgeApi {
     send("test", {});
   };
 
-  public requestAddBms = (specUrl: string): void => {
-    send("requestAddBms", { specUrl });
+  public requestAddBms = (manifestUrl: string): void => {
+    send("requestAddBms", { manifestUrl });
   };
 
   public requestAddGroup = (manifestUrl: string): void => {
