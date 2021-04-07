@@ -7,8 +7,8 @@ export const mockBmsSpec: BmsSpec = {
   domain: "venue.bmssearch.net",
   domainScopedId: "test_id3",
   title: "Falling Cxte",
-  groupSpecUrl: "https://venue.bmssearch.net/bmsshuin3/bbs",
-  updatesSpecUrl: "https://venue.bmssearch.net/boots_updates",
+  groupManifestUrl: "https://venue.bmssearch.net/bmsshuin3/bbs",
+  updatesManifestUrl: "https://venue.bmssearch.net/boots_updates",
   resources: [
     {
       name: "通常版",

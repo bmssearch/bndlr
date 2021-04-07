@@ -1,40 +1,34 @@
+import { Op, WhereOptions } from "sequelize";
+
 import { Bms } from "../models/Bms";
 import { BmsSpec } from "../models/BmsSpec";
 import { DBBms } from "../adapters/database/models/DBBms";
+import { Identifier } from "../models/Identity";
 
 export interface BmsRepository {
-  fetch: (domain: string, domainScopedId: string) => Promise<Bms | null>;
+  list: (identifiers: Identifier[]) => Promise<Bms[]>;
 
-  save: (bms: BmsSpec, checkedAt: Date) => Promise<Bms>;
+  update: (id: number, bmsManifest: BmsSpec) => Promise<void>;
+  create: (bmsManifest: BmsSpec) => Promise<Bms>;
 }
 
 export class LocalDbBmsRepository implements BmsRepository {
-  public fetch = async (domain: string, domainScopedId: string) => {
-    const dbBms = await DBBms.findOne({ where: { domain, domainScopedId } });
-    return dbBms ? dbBms.toBms() : null;
+  public list = async (identifiers: Identifier[]) => {
+    const whereOptions: WhereOptions<DBBms>[] = identifiers;
+    const dbBmses = await DBBms.findAll({ where: { [Op.or]: whereOptions } });
+    return dbBmses.map((v) => v.toBms());
   };
 
-  public save = async (bms: BmsSpec, checkedAt: Date): Promise<Bms> => {
-    // domain と domainScopedId をもって同一とみなす
+  public update = async (id: number, bmsManifest: BmsSpec) => {
+    await DBBms.update({ title: bmsManifest.title }, { where: { id } });
+  };
 
-    const existing = await DBBms.findOne({
-      where: { domain: bms.domain, domainScopedId: bms.domainScopedId },
+  public create = async (bmsManifest: BmsSpec): Promise<Bms> => {
+    const dbBms = await DBBms.create({
+      domain: bmsManifest.domain,
+      domainScopedId: bmsManifest.domainScopedId,
+      title: bmsManifest.title,
     });
-
-    let dbBms: DBBms;
-    if (existing) {
-      existing.specUrl = bms.specUrl;
-      existing.checkedAt = checkedAt;
-      dbBms = await existing.save();
-    } else {
-      dbBms = await DBBms.create({
-        domain: bms.domain,
-        domainScopedId: bms.domainScopedId,
-        title: bms.title,
-        specUrl: bms.specUrl,
-        checkedAt,
-      });
-    }
 
     return dbBms.toBms();
   };

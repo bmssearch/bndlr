@@ -8,8 +8,8 @@ export interface BmsSpecAttrs {
   domainScopedId: string;
   title: string;
   websiteUrl?: string;
-  groupSpecUrl?: string;
-  updatesSpecUrl?: string;
+  groupManifestUrl?: string;
+  updatesManifestUrl?: string;
   resources: ResourceSpec[];
 }
 
@@ -19,8 +19,8 @@ export class BmsSpec implements BmsSpecAttrs {
   public domainScopedId: string;
   public title: string;
   public websiteUrl?: string;
-  public groupSpecUrl?: string;
-  public updatesSpecUrl?: string;
+  public groupManifestUrl?: string;
+  public updatesManifestUrl?: string;
   public resources: ResourceSpec[];
 
   constructor(attrs: BmsSpecAttrs) {
@@ -29,8 +29,8 @@ export class BmsSpec implements BmsSpecAttrs {
     this.domainScopedId = attrs.domainScopedId;
     this.title = attrs.title;
     this.websiteUrl = attrs.websiteUrl;
-    this.groupSpecUrl = attrs.groupSpecUrl;
-    this.updatesSpecUrl = attrs.updatesSpecUrl;
+    this.groupManifestUrl = attrs.groupManifestUrl;
+    this.updatesManifestUrl = attrs.updatesManifestUrl;
     this.resources = attrs.resources;
   }
 
@@ -42,8 +42,8 @@ export class BmsSpec implements BmsSpecAttrs {
       domainScopedId: spec.id,
       title: "dummy title",
       websiteUrl: spec.website_url,
-      groupSpecUrl: spec.group_url,
-      updatesSpecUrl: spec.updates_url,
+      groupManifestUrl: spec.group_url,
+      updatesManifestUrl: spec.updates_url,
       resources,
     });
   };

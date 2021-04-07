@@ -7,8 +7,6 @@ export interface DBBmsAttrs {
   domain: string;
   domainScopedId: string;
   title: string;
-  specUrl: string;
-  checkedAt: Date;
 }
 
 interface DBBmsCreationAttrs extends Optional<DBBmsAttrs, "id"> {}
@@ -39,14 +37,6 @@ export class DBBms
           type: DataTypes.STRING(4096),
           allowNull: false,
         },
-        specUrl: {
-          type: DataTypes.STRING(4096),
-          allowNull: false,
-        },
-        checkedAt: {
-          type: DataTypes.DATE,
-          allowNull: false,
-        },
       },
       { sequelize, timestamps: false, tableName: "bmses" }
     );
@@ -58,8 +48,6 @@ export class DBBms
       domain: this.domain,
       domainScopedId: this.domainScopedId,
       title: this.title,
-      specUrl: this.specUrl,
-      checkedAt: this.checkedAt,
     });
   };
 
@@ -67,6 +55,4 @@ export class DBBms
   public domain!: string;
   public domainScopedId!: string;
   public title!: string;
-  public specUrl!: string;
-  public checkedAt!: Date;
 }

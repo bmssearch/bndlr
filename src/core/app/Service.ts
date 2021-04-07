@@ -1,13 +1,22 @@
+import {
+  CrossDomainIdentifierFactory,
+  IdentityFactory,
+} from "../models/Identity";
 import { Installation, InstallationStatus } from "../models/Installation";
 import { ResourceFilter, ResourceFilterConfig } from "./ResourceFilter";
 
+import { BmsCheckRepository } from "../repositories/BmsCheckRepository";
+import { BmsRegistrar } from "./BmsRegistrar";
 import { BmsRepository } from "../repositories/BmsRepository";
 import { BmsSpecRepository } from "../repositories/BmsSpecRepository";
 import { GroupManifestRepository } from "../repositories/GroupManifestRepository";
+import { GroupRegistrar } from "./GroupRegistrar";
 import { GroupRepository } from "../repositories/GroupRepository";
 import { InstallationRepository } from "../repositories/InstallationRepository";
 import { InstallationWorker } from "../workers/InstallationWorker";
+import { ObservationRegistrar } from "./ObservationRegistrar";
 import { ObservationRepository } from "../repositories/ObservationRepository";
+import { ResourceRegistrar } from "./ResourceRegistrar";
 import { ResourceRepository } from "../repositories/ResourceRepository";
 import { UpdatesManifestRepository } from "../repositories/UpdatesManifestRepository";
 import { isUpToDate } from "../utils/date";
@@ -16,15 +25,21 @@ export class Service {
   constructor(
     private installationWorker: InstallationWorker,
 
-    private bmsSpecRepository: BmsSpecRepository,
+    private bmsManifestRepository: BmsSpecRepository,
     private groupManifestRepository: GroupManifestRepository,
     private updatesManifestRepository: UpdatesManifestRepository,
 
     private bmsRepository: BmsRepository,
+    private bmsCheckRepository: BmsCheckRepository,
     private groupRepository: GroupRepository,
     private observationRepository: ObservationRepository,
     private resourceRepoisotry: ResourceRepository,
-    private installationRepoisotry: InstallationRepository
+    private installationRepoisotry: InstallationRepository,
+
+    private bmsRegistrar: BmsRegistrar,
+    private groupRegistrar: GroupRegistrar,
+    private observationRegistrar: ObservationRegistrar,
+    private resourceRegistrar: ResourceRegistrar
   ) {}
 
   public putInstallationIntoTaskQueue = async (installation: Installation) => {
@@ -44,52 +59,45 @@ export class Service {
     await this.installationRepoisotry.updateStatus(installationId, status);
   };
 
-  public addBms = async (specUrl: string): Promise<void> => {
-    const bmsSpec = await this.bmsSpecRepository.fetch(specUrl);
-    // ここでグループの情報も記録する
-    const bms = await this.bmsRepository.save(bmsSpec, new Date());
-    if (bmsSpec.updatesSpecUrl) {
-      await this.observationRepository.createOrIgnore(
-        bmsSpec.updatesSpecUrl,
+  public addBms = async (manifestUrl: string): Promise<void> => {
+    const bmsManifest = await this.bmsManifestRepository.fetch(manifestUrl);
+    const bmsIdentity = createIdentity(
+      bmsManifest.domain,
+      bmsManifest.domainScopedId
+    );
+
+    const bms = await this.bmsRegistrar.register(bmsManifest);
+
+    await this.bmsRegistrar.updateChecked(bmsIdentity, new Date());
+
+    if (bmsManifest.groupManifestUrl) {
+      const groupManifest = await this.groupManifestRepository.fetch(
+        bmsManifest.groupManifestUrl
+      );
+      await this.groupRegistrar.register(groupManifest);
+    }
+
+    if (bmsManifest.updatesManifestUrl) {
+      await this.observationRegistrar.register(
+        bmsManifest.updatesManifestUrl,
         new Date()
       );
     }
-    const resourcesToBeInstalled = resourceFilter.filter(bmsSpec.resources);
 
+    const resourcesToBeInstalled = resourceFilter.filter(bmsManifest.resources);
     for (const toBeInstalled of resourcesToBeInstalled) {
-      // リソース自体の情報は常に更新しておく
-      const resource = await this.resourceRepoisotry.save(
-        toBeInstalled,
-        bms.id
-      );
-
-      const latestInstallation = await this.installationRepoisotry.fetchLatestForResource(
-        resource.id
-      );
-
-      if (isUpToDate(toBeInstalled.updatedAt, latestInstallation?.createdAt)) {
-        continue;
-      }
-
-      if (latestInstallation?.status === "proposed") {
-        await this.installationRepoisotry.updateStatus(
-          latestInstallation.id,
-          "skipped"
-        );
-      }
-
-      await this.installationRepoisotry.create(resource.id);
+      await this.resourceRegistrar.register(toBeInstalled, bms.id);
     }
     return;
   };
 
   public addGroup = async (manifestUrl: string) => {
     const groupManifest = await this.groupManifestRepository.fetch(manifestUrl);
-    // グループを記録する。同一グループが存在したら記録しない。
-    const group = await this.groupRepository.save(groupManifest, true);
+
+    await this.groupRegistrar.register(groupManifest);
 
     if (groupManifest.updatesManifestUrl) {
-      await this.observationRepository.createOrIgnore(
+      await this.observationRegistrar.register(
         groupManifest.updatesManifestUrl,
         new Date()
       );
@@ -111,22 +119,21 @@ export class Service {
 
       if (!updates.bmses) continue;
       for (const updatedBms of updates.bmses) {
-        // レコードからBMS引っ張ってきて、最新かどうか調べる
-        const corrBms = await this.bmsRepository.fetch(
-          updatedBms.domain,
-          updatedBms.domainScopedId
-        );
-        const shouldUpdate = corrBms
-          ? !isUpToDate(updatedBms.updatedAt, corrBms.checkedAt)
+        const latestCheck = await this.bmsCheckRepository.fetch({
+          domain: updatedBms.domain,
+          domainScopedId: updatedBms.domainScopedId,
+        });
+        const shouldUpdate = latestCheck
+          ? !isUpToDate(updatedBms.updatedAt, latestCheck.checkedAt)
           : false;
 
         // groupIDが指定されていれば、レコードからgroup引っ張ってきて自動追加対象か調べる
         let belongsToAutoAddingGroup = false;
         if (updatedBms.domainScopedGroupId) {
-          const corrGroup = await this.groupRepository.fetch(
-            updatedBms.domain,
-            updatedBms.domainScopedGroupId
-          );
+          const corrGroup = await this.groupRepository.fetch({
+            domain: updatedBms.domain,
+            domainScopedId: updatedBms.domainScopedGroupId,
+          });
           if (corrGroup && corrGroup.autoDownloadNewBmses) {
             belongsToAutoAddingGroup = true;
           }
@@ -139,6 +146,23 @@ export class Service {
     }
   };
 }
+
+const createIdentity = (domain: string, domainScopedId: string) => {
+  const cdIdentifierFactory = new CrossDomainIdentifierFactory([
+    ["bmssearch.net", "venue.bmssearch.net", "ringo.com"],
+  ]);
+  const identityFactory = new IdentityFactory(cdIdentifierFactory);
+
+  const identity = identityFactory.create(
+    {
+      domain: domain,
+      domainScopedId: domainScopedId,
+    },
+    [{ domain: "ringo.com", domainScopedId: "didid" }]
+  );
+
+  return identity;
+};
 
 const resourceFilterConfig: ResourceFilterConfig = {
   core: {

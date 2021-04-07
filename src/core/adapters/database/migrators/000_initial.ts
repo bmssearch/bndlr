@@ -25,17 +25,26 @@ export const migrator: Migrator = {
           type: DataTypes.STRING(4096),
           allowNull: false,
         },
-        specUrl: {
-          type: DataTypes.STRING(4096),
-          allowNull: false,
-        },
-        checkedAt: {
-          type: DataTypes.DATE,
-          allowNull: false,
-        },
       },
       { uniqueKeys: { idWithDomain: { fields: ["domain", "domainScopedId"] } } }
     );
+
+    await qi.createTable("bms_checks", {
+      domain: {
+        type: DataTypes.STRING(4096),
+        allowNull: false,
+        primaryKey: true,
+      },
+      domainScopedId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        primaryKey: true,
+      },
+      checkedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+      },
+    });
 
     await qi.createTable("observations", {
       specUrl: {
@@ -67,10 +76,6 @@ export const migrator: Migrator = {
           type: DataTypes.STRING,
           allowNull: false,
           unique: "idWithDomain",
-        },
-        manifestUrl: {
-          type: DataTypes.STRING(4096),
-          allowNull: false,
         },
         name: {
           type: DataTypes.STRING(4096),
@@ -144,6 +149,7 @@ export const migrator: Migrator = {
   },
   down: async ({ context: qi }) => {
     await qi.dropTable("bmses");
+    await qi.dropTable("bms_checks");
     await qi.dropTable("observations");
     await qi.dropTable("groups");
     await qi.dropTable("resources");

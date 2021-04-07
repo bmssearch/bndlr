@@ -6,7 +6,6 @@ export interface DBGroupAttrs {
   id: number;
   domain: string;
   domainScopedId: string;
-  manifestUrl: string;
   name: string;
   autoAddNewBmses: boolean;
 }
@@ -35,10 +34,6 @@ export class DBGroup
           allowNull: false,
           unique: "idWithDomain",
         },
-        manifestUrl: {
-          type: DataTypes.STRING(4096),
-          allowNull: false,
-        },
         name: {
           type: DataTypes.STRING(4096),
           allowNull: false,
@@ -57,7 +52,6 @@ export class DBGroup
       id: this.id,
       domain: this.domain,
       domainScopedId: this.domainScopedId,
-      manifestUrl: this.manifestUrl,
       name: this.name,
       autoDownloadNewBmses: this.autoAddNewBmses,
     });
@@ -66,7 +60,6 @@ export class DBGroup
   public id!: number;
   public domain!: string;
   public domainScopedId!: string;
-  public manifestUrl!: string;
   public name!: string;
   public autoAddNewBmses!: boolean;
 }

@@ -11,12 +11,15 @@ import {
 
 import { AppEventEmitter } from "./AppEventRouter/types";
 import { AppEventRouter } from "./AppEventRouter";
+import { BmsRegistrar } from "../../core/app/BmsRegistrar";
 import { BridgeEventRelay } from "./BridgeEventRelay";
 import { DownloaderFactory } from "../../core/adapters/Downloader";
 import { EventEmitterQueue } from "../../core/adapters/Queue";
 import { ExtractorFactory } from "../../core/adapters/Extractor";
+import { GroupRegistrar } from "../../core/app/GroupRegistrar";
 import { Installation } from "../../core/models/Installation";
 import { InstallationWorker } from "../../core/workers/InstallationWorker";
+import { LocalDbBmsCheckRepository } from "../../core/repositories/BmsCheckRepository";
 import { LocalDbBmsRepository } from "../../core/repositories/BmsRepository";
 import { LocalDbGroupRepository } from "../../core/repositories/GroupRepository";
 import { LocalDbInstallationRepository } from "../../core/repositories/InstallationRepository";
@@ -25,6 +28,8 @@ import { LocalDbResourceRepository } from "../../core/repositories/ResourceRepos
 import { MockBmsSpecRepository } from "../../core/repositories/BmsSpecRepository";
 import { MockGroupManifestRepository } from "../../core/repositories/GroupManifestRepository";
 import { MockUpdatesManifestRepository } from "../../core/repositories/UpdatesManifestRepository";
+import { ObservationRegistrar } from "../../core/app/ObservationRegistrar";
+import { ResourceRegistrar } from "../../core/app/ResourceRegistrar";
 import { Service } from "../../core/app/Service";
 import { TemporaryDiskProviderFactory } from "../../core/adapters/TemporaryDiskProvider";
 import { createMainWindow } from "../windows/main";
@@ -40,10 +45,26 @@ const updatesManifestRepository = new MockUpdatesManifestRepository(
 );
 
 const bmsRepository = new LocalDbBmsRepository();
+const bmsCheckRepository = new LocalDbBmsCheckRepository();
 const groupRepository = new LocalDbGroupRepository();
 const observationRepository = new LocalDbObservationRepository();
 const resourceRepoisotry = new LocalDbResourceRepository();
 const installationRepository = new LocalDbInstallationRepository();
+
+const bmsRegistrar = new BmsRegistrar(
+  bmsSpecRepository,
+  bmsRepository,
+  bmsCheckRepository
+);
+const groupRegistrar = new GroupRegistrar(
+  groupManifestRepository,
+  groupRepository
+);
+const resourceRegistrar = new ResourceRegistrar(
+  resourceRepoisotry,
+  installationRepository
+);
+const observationRegistrar = new ObservationRegistrar(observationRepository);
 
 const tpdFactory = new TemporaryDiskProviderFactory();
 const downloaderFactory = new DownloaderFactory();
@@ -74,10 +95,16 @@ export const onAppReady = async () => {
     updatesManifestRepository,
 
     bmsRepository,
+    bmsCheckRepository,
     groupRepository,
     observationRepository,
     resourceRepoisotry,
-    installationRepository
+    installationRepository,
+
+    bmsRegistrar,
+    groupRegistrar,
+    observationRegistrar,
+    resourceRegistrar
   );
 
   const appEventEmitter = new AppEventEmitter();
