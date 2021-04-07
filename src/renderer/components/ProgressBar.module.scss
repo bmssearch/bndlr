@@ -1,0 +1,56 @@
+@import "../theme.scss";
+
+.wrapper {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 4px;
+}
+
+.gutter {
+  display: block;
+  position: absolute;
+  background: $MIDNIGHT_400;
+  height: 4px;
+
+  &.indeterminate {
+    width: 150%;
+  }
+
+  &.determinate {
+    width: 100%;
+  }
+}
+
+.subline {
+  position: absolute;
+  background: $PRIMARY_900;
+  height: 5px;
+}
+.inc {
+  animation: increase 2s infinite;
+}
+.dec {
+  animation: decrease 2s 0.5s infinite;
+}
+
+@keyframes increase {
+  from {
+    left: -5%;
+    width: 5%;
+  }
+  to {
+    left: 130%;
+    width: 100%;
+  }
+}
+@keyframes decrease {
+  from {
+    left: -80%;
+    width: 80%;
+  }
+  to {
+    left: 110%;
+    width: 10%;
+  }
+}

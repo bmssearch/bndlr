@@ -1,23 +1,23 @@
-import React, { useCallback, useEffect, useState } from "react";
+import "./reset.scss";
+import "./global.scss";
 
+import React, { useEffect, useMemo, useState } from "react";
+
+import { AppBar } from "./components/AppBar";
+import { GroupedInstallationCard } from "./components/GroupedInstallationCard";
+import { Header } from "./components/Header";
 import { Installation } from "../core/models/Installation";
+import { InstallationCard } from "./components/InstallationCard";
 import { InstallationProgress } from "../core/models/InstallationProgress";
 import { api } from "../api/api";
+import { chain } from "lodash";
 import styles from "./App.module.scss";
 
 const App: React.FC = () => {
-  const [specUrl, setSpecUrl] = useState(
-    "https://venue.bmssearch.net/bmsshuin3/72"
-  );
-
   const [installations, setInstallations] = useState<Installation[]>([]);
   const [progressMap, setProgressMap] = useState<
     Map<number, InstallationProgress>
   >(new Map());
-
-  const onClickButton = useCallback(() => {
-    api.requestAddBms(specUrl);
-  }, [specUrl]);
 
   useEffect(() => {
     return api.listenToInstallationsUpdate((e, { installations }) => {
@@ -43,47 +43,52 @@ const App: React.FC = () => {
     });
   });
 
+  const proposedBmsGroups = useMemo(() => {
+    const proposedInstallations = installations.filter(
+      (v) => v.status === "proposed"
+    );
+    const res = chain(proposedInstallations)
+      .groupBy((item) => item.resource.bms.id)
+      .map((v) => ({ bms: v[0].resource.bms, installations: v }))
+      .value();
+    return res;
+  }, [installations]);
+
   return (
-    <div>
-      <h2 className={styles.sample}>HELLO WOR</h2>
-      <input
-        type="text"
-        value={specUrl}
-        onChange={(e) => setSpecUrl(e.target.value)}
-      />
+    <div className={styles.wrapper}>
+      <AppBar />
+      {proposedBmsGroups.length > 0 && <Header title="一括" />}
+      {proposedBmsGroups.map((bmsGroup) => (
+        <GroupedInstallationCard
+          key={bmsGroup.bms.id}
+          bms={bmsGroup.bms}
+          installations={bmsGroup.installations}
+          onPressInstall={() => {
+            // no op
+          }}
+          onPressSkip={() => {
+            // no op
+          }}
+        />
+      ))}
+      <Header title="個別" />
       {installations.map((installation) => {
-        const prog = progressMap.get(installation.id);
+        const progress = progressMap.get(installation.id);
         return (
-          <div key={installation.id}>
-            {prog && (
-              <p>
-                処理中
-                {prog.progress?.type}
-                {prog.progress?.type === "transferring" &&
-                prog.progress.totalByte
-                  ? `${
-                      (prog.progress.transferedByte * 100) /
-                      prog.progress.totalByte
-                    }%`
-                  : "-"}
-              </p>
-            )}
-            <p>{installation.resource.bms.title}</p>
-            <p>{installation.resource.url}</p>
-            <p>{installation.createdAt.toLocaleString()}</p>
-            <p>{installation.status}</p>
-            <div>
-              <button
-                disabled={!!prog}
-                onClick={() => api.acceptProposedInstallation([installation])}
-              >
-                ダウンロード
-              </button>
-            </div>
-          </div>
+          <InstallationCard
+            key={installation.id}
+            installation={installation}
+            onPressInstall={(installation) => {
+              api.acceptProposedInstallation([installation]);
+            }}
+            onPressSkip={() => {
+              // no op
+            }}
+            progress={progress}
+          />
         );
       })}
-      <button onClick={onClickButton}>Add Bms</button>
+      <button onClick={() => api.requestAddBms("https://ser")}>Add Bms</button>
       <button onClick={() => api.requestAddGroup("test")}>Add Group</button>
       <button onClick={() => api.requestCheckUpdates()}>Check Updates</button>
       <button onClick={() => api.test()}>TEST</button>

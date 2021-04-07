@@ -1,10 +1,12 @@
 import { Bms } from "./Bms";
 
+export type ResourceType = "core" | "patch" | "additional";
+
 export interface ResourceAttrs {
   id: number;
   bms: Bms;
   url: string;
-  type: "core" | "patch" | "additional";
+  type: ResourceType;
   updatedAt?: Date;
 }
 
@@ -12,7 +14,7 @@ export class Resource implements ResourceAttrs {
   public id: number;
   public bms: Bms;
   public url: string;
-  public type: "core" | "patch" | "additional";
+  public type: ResourceType;
   public updatedAt?: Date;
 
   constructor(attrs: ResourceAttrs) {

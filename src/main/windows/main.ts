@@ -1,3 +1,4 @@
+import { BridgeEventList } from "../../api/events";
 import { BridgeEventRelay } from "../app/BridgeEventRelay";
 import { BrowserWindow } from "electron";
 
@@ -14,8 +15,11 @@ export const createMainWindow = (relay: BridgeEventRelay): void => {
   });
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-  const handler = (channel: string, ...args: any[]) => {
-    mainWindow.webContents.send(channel, ...args);
+  const handler = <K extends keyof BridgeEventList>(
+    channel: K,
+    params: BridgeEventList[K]
+  ) => {
+    mainWindow.webContents.send(channel, params);
   };
   relay.onEvent(handler);
   mainWindow.on("closed", () => {

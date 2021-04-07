@@ -4,8 +4,8 @@ import { IpcMainEvent } from "electron";
 
 export class RelayEventEmitter extends EventEmitter {
   // メソッド本体。元々のemitメソッドを踏襲している
-  public emit(event: "event", ...args: any[]) {
-    return super.emit(event, ...args);
+  public emit(event: "event", channel: string, params: any) {
+    return super.emit(event, channel, params);
   }
 }
 

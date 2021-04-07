@@ -1,0 +1,28 @@
+@import "../../theme.scss";
+
+.wrapper {
+  padding: 20px;
+  display: flex;
+
+  &:hover {
+    background-color: $MIDNIGHT_50;
+  }
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  margin-top: -2px;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: bold;
+  color: $MIDNIGHT_900;
+  flex: 1;
+}
+
+.buttons {
+  display: flex;
+  margin: -6px -6px -6px 0;
+}

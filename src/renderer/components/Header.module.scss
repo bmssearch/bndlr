@@ -1,0 +1,12 @@
+@import "../theme.scss";
+
+.wrapper {
+  background: $MIDNIGHT_100;
+  padding: 8px 20px;
+  border-bottom: 1px solid $MIDNIGHT_BORDER;
+}
+
+.title {
+  font-size: 12px;
+  color: $MIDNIGHT_700;
+}

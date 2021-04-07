@@ -1,8 +1,4 @@
-import {
-  BridgeEventEmitter,
-  BridgeEventHandler,
-  RelayEventEmitter,
-} from "./types";
+import { BridgeEventEmitter, RelayEventEmitter } from "./types";
 
 import { AppEventEmitter } from "../AppEventRouter/types";
 import { BridgeEventList } from "../../../api/events";
@@ -46,12 +42,12 @@ export class BridgeEventRelay {
   };
 
   public onEvent = <K extends keyof BridgeEventList>(
-    handler: BridgeEventHandler<K>
+    handler: (channel: K, params: BridgeEventList[K]) => void
   ) => {
     this.relayEventEmitter.on("event", handler);
   };
   public removeListener = <K extends keyof BridgeEventList>(
-    handler: BridgeEventHandler<K>
+    handler: (channel: K, params: BridgeEventList[K]) => void
   ) => {
     this.relayEventEmitter.removeListener("event", handler);
   };

@@ -1,4 +1,4 @@
-import { BrowserWindow, app, ipcMain } from "electron";
+import { BrowserWindow, Menu, app, ipcMain } from "electron";
 import {
   ResourceInstallerFactory,
   ResourceInstallerProgress,
@@ -102,6 +102,8 @@ export const onAppReady = async () => {
 
   setTray();
   createMainWindow(relay);
+
+  Menu.setApplicationMenu(null);
 
   app.on("window-all-closed", () => {
     if (process.platform !== "darwin") {

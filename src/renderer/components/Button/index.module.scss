@@ -1,0 +1,40 @@
+@import "../../theme.scss";
+
+.wrapper {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  padding: 6px;
+  appearance: none;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: $MIDNIGHT_400;
+  }
+  &:active {
+    background-color: $MIDNIGHT_500;
+  }
+
+  &.primary {
+    color: $PRIMARY_900;
+  }
+
+  &.secondary {
+    color: $MIDNIGHT_700;
+  }
+}
+
+.icon {
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+}

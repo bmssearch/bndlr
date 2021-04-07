@@ -1,3 +1,7 @@
-.sample {
-  color: red;
+@import "./theme.scss";
+
+.wrapper {
+  border: 2px solid $MIDNIGHT_BORDER_HEAVY;
+  height: 100vh;
+  overflow: auto;
 }

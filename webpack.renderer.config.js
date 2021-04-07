@@ -10,6 +10,14 @@ rules.push({
     "sass-loader",
   ],
 });
+rules.push({
+  test: /\.(png|jpe?g|gif)$/i,
+  use: [
+    {
+      loader: "file-loader",
+    },
+  ],
+});
 
 module.exports = {
   module: {
@@ -17,6 +25,6 @@ module.exports = {
   },
   plugins: plugins,
   resolve: {
-    extensions: [".js", ".ts", ".jsx", ".tsx", ".scss"],
+    extensions: [".js", ".ts", ".jsx", ".tsx", ".scss", ".png"],
   },
 };
