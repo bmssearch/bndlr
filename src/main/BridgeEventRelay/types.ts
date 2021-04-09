@@ -1,4 +1,4 @@
-import { BridgeEventList } from "../../../api/events";
+import { BridgeEventList } from "../../api/events";
 import { EventEmitter } from "events";
 import { IpcMainEvent } from "electron";
 

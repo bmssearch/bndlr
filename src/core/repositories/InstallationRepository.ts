@@ -9,7 +9,10 @@ export interface InstallationRepository {
 
   fetchLatestForResource: (resourceId: number) => Promise<Installation | null>;
 
-  create: (resourceId: number) => Promise<Installation>;
+  create: (
+    resourceId: number,
+    status: InstallationStatus
+  ) => Promise<Installation>;
 
   updateStatus: (id: number, status: InstallationStatus) => Promise<void>;
   delete: (id: number) => Promise<void>;
@@ -49,7 +52,7 @@ export class LocalDbInstallationRepository implements InstallationRepository {
     );
   };
 
-  public create = async (resourceId: number) => {
+  public create = async (resourceId: number, status: InstallationStatus) => {
     const dbResource = await DBResource.findByPk(resourceId, {
       include: { model: DBBms, as: "bms" },
     });
@@ -57,7 +60,7 @@ export class LocalDbInstallationRepository implements InstallationRepository {
 
     const dbInstallation = await DBInstallation.create({
       resourceId,
-      status: "proposed",
+      status: status,
       createdAt: new Date(),
     });
 

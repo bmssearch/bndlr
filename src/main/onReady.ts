@@ -2,39 +2,44 @@ import { BrowserWindow, Menu, app, ipcMain } from "electron";
 import {
   ResourceInstallerFactory,
   ResourceInstallerProgress,
-} from "../../core/adapters/ResourceInstaller";
+} from "../core/adapters/ResourceInstaller";
 import {
   mockBmsManifest,
   mockGroupManifest,
   mockUpdatesManifest,
-} from "../../__mock__/mocks";
+} from "../__mock__/mocks";
 
 import { AppEventEmitter } from "./AppEventRouter/types";
 import { AppEventRouter } from "./AppEventRouter";
-import { BmsRegistrar } from "../../core/app/BmsRegistrar";
+import { BmsRegistrar } from "../core/app/BmsRegistrar";
 import { BridgeEventRelay } from "./BridgeEventRelay";
-import { DownloaderFactory } from "../../core/adapters/Downloader";
-import { EventEmitterQueue } from "../../core/adapters/Queue";
-import { ExtractorFactory } from "../../core/adapters/Extractor";
-import { GroupRegistrar } from "../../core/app/GroupRegistrar";
-import { Installation } from "../../core/models/Installation";
-import { InstallationWorker } from "../../core/workers/InstallationWorker";
-import { LocalDbBmsCheckRepository } from "../../core/repositories/BmsCheckRepository";
-import { LocalDbBmsRepository } from "../../core/repositories/BmsRepository";
-import { LocalDbGroupRepository } from "../../core/repositories/GroupRepository";
-import { LocalDbInstallationRepository } from "../../core/repositories/InstallationRepository";
-import { LocalDbObservationRepository } from "../../core/repositories/ObservationRepository";
-import { LocalDbResourceRepository } from "../../core/repositories/ResourceRepository";
-import { MockBmsManifestRepository } from "../../core/repositories/BmsManifestRepository";
-import { MockGroupManifestRepository } from "../../core/repositories/GroupManifestRepository";
-import { MockUpdatesManifestRepository } from "../../core/repositories/UpdatesManifestRepository";
-import { ObservationRegistrar } from "../../core/app/ObservationRegistrar";
-import { ResourceRegistrar } from "../../core/app/ResourceRegistrar";
-import { Service } from "../../core/app/Service";
-import { TemporaryDiskProviderFactory } from "../../core/adapters/TemporaryDiskProvider";
-import { createMainWindow } from "../windows/main";
+import { DownloaderFactory } from "../core/adapters/Downloader";
+import { EventEmitterQueue } from "../core/adapters/Queue";
+import { ExtractorFactory } from "../core/adapters/Extractor";
+import { GroupRegistrar } from "../core/app/GroupRegistrar";
+import { Installation } from "../core/models/Installation";
+import { InstallationWorker } from "../core/workers/InstallationWorker";
+import { LocalDbBmsCheckRepository } from "../core/repositories/BmsCheckRepository";
+import { LocalDbBmsRepository } from "../core/repositories/BmsRepository";
+import { LocalDbGroupRepository } from "../core/repositories/GroupRepository";
+import { LocalDbInstallationRepository } from "../core/repositories/InstallationRepository";
+import { LocalDbObservationRepository } from "../core/repositories/ObservationRepository";
+import { LocalDbResourceRepository } from "../core/repositories/ResourceRepository";
+import { MockBmsManifestRepository } from "../core/repositories/BmsManifestRepository";
+import { MockGroupManifestRepository } from "../core/repositories/GroupManifestRepository";
+import { MockUpdatesManifestRepository } from "../core/repositories/UpdatesManifestRepository";
+import { ObservationRegistrar } from "../core/app/ObservationRegistrar";
+import { ObservationWorker } from "../core/workers/ObservationWorker";
+import { ResourceRegistrar } from "../core/app/ResourceRegistrar";
+import { Service } from "../core/app/Service";
+import { StorePreferencesRepository } from "../core/repositories/PreferencesRepository";
+import { TemporaryDiskProviderFactory } from "../core/adapters/TemporaryDiskProvider";
+import { createMainWindow } from "./windows/main";
+import { createSettingsWindow } from "./windows/settings";
 import { initialize } from "./initialize";
-import { setTray } from "../windows/tray";
+import { setTray } from "./windows/tray";
+
+const preferencesRepository = new StorePreferencesRepository();
 
 const bmsManifestRepository = new MockBmsManifestRepository(mockBmsManifest);
 const groupManifestRepository = new MockGroupManifestRepository(
@@ -61,6 +66,7 @@ const groupRegistrar = new GroupRegistrar(
   groupRepository
 );
 const resourceRegistrar = new ResourceRegistrar(
+  preferencesRepository,
   resourceRepoisotry,
   installationRepository
 );
@@ -83,11 +89,19 @@ export const onAppReady = async () => {
     ResourceInstallerProgress
   >();
   const installationWorker = new InstallationWorker(
+    preferencesRepository,
     installationQueue,
     resourceInstallerFactory
   );
 
+  const observationWorker = new ObservationWorker(
+    preferencesRepository,
+    observationRepository
+  );
+
   const service = new Service(
+    preferencesRepository,
+
     installationWorker,
 
     bmsManifestRepository,
@@ -127,8 +141,14 @@ export const onAppReady = async () => {
   });
   installationWorker.start();
 
+  observationWorker.addDetectUpdateListener(() => {
+    appEventEmitter.emit("checkUpdates", {});
+  });
+  observationWorker.start();
+
   setTray();
   createMainWindow(relay);
+  createSettingsWindow(relay);
 
   Menu.setApplicationMenu(null);
 

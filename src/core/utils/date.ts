@@ -1,3 +1,5 @@
+import { DateTime } from "luxon";
+
 export const isUpToDate = (
   latest: Date | undefined,
   current: Date | undefined
@@ -9,4 +11,11 @@ export const isUpToDate = (
   } else {
     return latest <= current;
   }
+};
+
+export const isOverInterval = (from: Date, now: Date, intervalSec: number) => {
+  return (
+    DateTime.fromJSDate(from).plus({ seconds: intervalSec }) <
+    DateTime.fromJSDate(now)
+  );
 };

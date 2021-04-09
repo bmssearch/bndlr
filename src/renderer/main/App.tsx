@@ -1,4 +1,4 @@
-import "./reset.scss";
+import "../reset.scss";
 import "./global.scss";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -6,10 +6,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import { AppBar } from "./components/AppBar";
 import { GroupedInstallationCard } from "./components/GroupedInstallationCard";
 import { Header } from "./components/Header";
-import { Installation } from "../core/models/Installation";
+import { Installation } from "../../core/models/Installation";
 import { InstallationCard } from "./components/InstallationCard";
-import { InstallationProgress } from "../core/models/InstallationProgress";
-import { api } from "../api/api";
+import { InstallationProgress } from "../../core/models/InstallationProgress";
+import { api } from "../../api/api";
 import { chain } from "lodash";
 import styles from "./App.module.scss";
 

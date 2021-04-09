@@ -1,14 +1,14 @@
 import {
   Installation,
   InstallationStatus,
-} from "../../../core/models/Installation";
+} from "../../../../core/models/Installation";
 
 import { Button } from "../Button";
 import { DateTime } from "luxon";
-import { InstallationProgress } from "../../../core/models/InstallationProgress";
+import { InstallationProgress } from "../../../../core/models/InstallationProgress";
 import { Progress } from "./Progress";
 import React from "react";
-import { ResourceType } from "../../../core/models/Resource";
+import { ResourceType } from "../../../../core/models/Resource";
 import clsx from "clsx";
 import downloadIconImg from "./assets/download.png";
 import failedIconImg from "./assets/failed.png";

@@ -1,7 +1,7 @@
 import { BridgeEventEmitter, RelayEventEmitter } from "./types";
 
 import { AppEventEmitter } from "../AppEventRouter/types";
-import { BridgeEventList } from "../../../api/events";
+import { BridgeEventList } from "../../api/events";
 
 export class BridgeEventRelay {
   private relayEventEmitter: RelayEventEmitter;

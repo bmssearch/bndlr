@@ -1,5 +1,5 @@
 import { BridgeEventList } from "../../api/events";
-import { BridgeEventRelay } from "../app/BridgeEventRelay";
+import { BridgeEventRelay } from "../BridgeEventRelay";
 import { BrowserWindow } from "electron";
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;

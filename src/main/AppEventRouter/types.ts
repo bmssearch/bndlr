@@ -1,7 +1,7 @@
 import { EventEmitter } from "events";
-import { Installation } from "../../../core/models/Installation";
-import { QueueItem } from "../../../core/adapters/Queue";
-import { ResourceInstallerProgress } from "../../../core/adapters/ResourceInstaller";
+import { Installation } from "../../core/models/Installation";
+import { QueueItem } from "../../core/adapters/Queue";
+import { ResourceInstallerProgress } from "../../core/adapters/ResourceInstaller";
 
 export interface AppEventList {
   test: Record<string, never>;

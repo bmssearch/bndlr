@@ -1,6 +1,6 @@
-import { Bms } from "../../../core/models/Bms";
+import { Bms } from "../../../../core/models/Bms";
 import { Button } from "../Button";
-import { Installation } from "../../../core/models/Installation";
+import { Installation } from "../../../../core/models/Installation";
 import React from "react";
 import bundleIconImg from "./assets/bundle.png";
 import clsx from "clsx";

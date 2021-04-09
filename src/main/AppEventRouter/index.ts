@@ -1,7 +1,7 @@
 import { AppEventEmitter } from "./types";
 import { BridgeEventRelay } from "../BridgeEventRelay";
-import { InstallationProgress } from "../../../core/models/InstallationProgress";
-import { Service } from "../../../core/app/Service";
+import { InstallationProgress } from "../../core/models/InstallationProgress";
+import { Service } from "../../core/app/Service";
 import { throttle } from "throttle-debounce";
 
 export class AppEventRouter {

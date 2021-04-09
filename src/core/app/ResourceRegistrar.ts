@@ -1,10 +1,14 @@
 import { InstallationRepository } from "../repositories/InstallationRepository";
+import { InstallationStatus } from "../models/Installation";
+import { PreferencesRepository } from "../repositories/PreferencesRepository";
 import { ResourceManifest } from "../models/ResourceManifest";
 import { ResourceRepository } from "../repositories/ResourceRepository";
 import { isUpToDate } from "../utils/date";
+import { urlDomain } from "../utils/url";
 
 export class ResourceRegistrar {
   constructor(
+    private preferencesRepository: PreferencesRepository,
     private resourceRepository: ResourceRepository,
     private installationRepository: InstallationRepository
   ) {}
@@ -34,7 +38,15 @@ export class ResourceRegistrar {
       );
     }
 
-    await this.installationRepository.create(resource.id);
+    const {
+      resourcePreferences: { downloadUnsupportedDomains },
+    } = await this.preferencesRepository.get();
+    const status: InstallationStatus = downloadUnsupportedDomains.includes(
+      urlDomain(resource.url)
+    )
+      ? "skipped"
+      : "proposed";
+    await this.installationRepository.create(resource.id, status);
     return;
   };
 }

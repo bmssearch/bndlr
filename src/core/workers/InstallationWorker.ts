@@ -5,8 +5,7 @@ import {
 } from "../adapters/ResourceInstaller";
 
 import { Installation } from "../models/Installation";
-
-const ROOT_DIR = "F:\\temporary\\BMS";
+import { PreferencesRepository } from "../repositories/PreferencesRepository";
 
 type Handler = (
   items: QueueItem<Installation, ResourceInstallerProgress>[]
@@ -20,6 +19,7 @@ export class InstallationWorker {
   private errorListeners: FinishHandler[] = [];
 
   constructor(
+    private preferenceRepository: PreferencesRepository,
     private queue: Queue<Installation, ResourceInstallerProgress>,
     private resourceInstallerFactory: ResourceInstallerFactory
   ) {}
@@ -31,7 +31,12 @@ export class InstallationWorker {
         resourceInstaller.onProgress((progress) => {
           onProgress(progress);
         });
-        await resourceInstaller.install(entity.resource.url, ROOT_DIR);
+
+        const {
+          resourcePreferences: { installationDist },
+        } = await this.preferenceRepository.get();
+        // distが無効だったら全部ダメなのでFATAL扱いにする
+        await resourceInstaller.install(entity.resource.url, installationDist);
         this.finishListeners.forEach((listener) => {
           listener(entity.id);
         });

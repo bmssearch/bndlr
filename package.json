@@ -51,9 +51,17 @@
               "config": "./webpack.renderer.config.js",
               "entryPoints": [
                 {
-                  "html": "./src/renderer/index.html",
-                  "js": "./src/renderer/index.ts",
+                  "html": "./src/renderer/main/index.html",
+                  "js": "./src/renderer/main/index.ts",
                   "name": "main_window",
+                  "preload": {
+                    "js": "./src/api/preload.ts"
+                  }
+                },
+                {
+                  "html": "./src/renderer/settings/index.html",
+                  "js": "./src/renderer/settings/index.ts",
+                  "name": "settings_window",
                   "preload": {
                     "js": "./src/api/preload.ts"
                   }
@@ -73,6 +81,7 @@
     "@electron-forge/maker-zip": "^6.0.0-beta.54",
     "@electron-forge/plugin-webpack": "6.0.0-beta.54",
     "@marshallofsound/webpack-asset-relocator-loader": "^0.5.0",
+    "@types/auto-launch": "^5.0.1",
     "@types/follow-redirects": "^1.13.0",
     "@types/fs-extra": "^9.0.9",
     "@types/lodash": "^4.14.168",
@@ -104,8 +113,10 @@
   },
   "dependencies": {
     "@bmssearch/bms-bundle-spec": "file:../bms-bundle-spec-js",
+    "auto-launch": "^5.0.5",
     "clsx": "^1.1.1",
     "electron-squirrel-startup": "^1.0.0",
+    "electron-store": "^7.0.3",
     "follow-redirects": "^1.13.3",
     "fs-extra": "^8.1.0",
     "lodash": "^4.17.21",

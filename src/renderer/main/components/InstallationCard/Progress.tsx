@@ -1,7 +1,7 @@
 import {
   InstallationProgress,
   InstallationProgressProgress,
-} from "../../../core/models/InstallationProgress";
+} from "../../../../core/models/InstallationProgress";
 
 import { ProgressBar } from "../ProgressBar";
 import React from "react";

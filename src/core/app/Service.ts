@@ -3,7 +3,6 @@ import {
   IdentityFactory,
 } from "../models/Identity";
 import { Installation, InstallationStatus } from "../models/Installation";
-import { ResourceFilter, ResourceFilterConfig } from "./ResourceFilter";
 
 import { BmsCheckRepository } from "../repositories/BmsCheckRepository";
 import { BmsManifestRepository } from "../repositories/BmsManifestRepository";
@@ -16,13 +15,16 @@ import { InstallationRepository } from "../repositories/InstallationRepository";
 import { InstallationWorker } from "../workers/InstallationWorker";
 import { ObservationRegistrar } from "./ObservationRegistrar";
 import { ObservationRepository } from "../repositories/ObservationRepository";
+import { PreferencesRepository } from "../repositories/PreferencesRepository";
 import { ResourceRegistrar } from "./ResourceRegistrar";
 import { ResourceRepository } from "../repositories/ResourceRepository";
+import { ResourceSelector } from "./ResourceSelector";
 import { UpdatesManifestRepository } from "../repositories/UpdatesManifestRepository";
 import { isUpToDate } from "../utils/date";
 
 export class Service {
   constructor(
+    private preferencesRepository: PreferencesRepository,
     private installationWorker: InstallationWorker,
 
     private bmsManifestRepository: BmsManifestRepository,
@@ -84,7 +86,14 @@ export class Service {
       );
     }
 
-    const resourcesToBeInstalled = resourceFilter.filter(bmsManifest.resources);
+    const {
+      resourcePreferences: resourcePreference,
+    } = await this.preferencesRepository.get();
+    const resourceSelector = new ResourceSelector({ ...resourcePreference });
+    const resourcesToBeInstalled = resourceSelector.select(
+      bmsManifest.resources
+    );
+
     for (const toBeInstalled of resourcesToBeInstalled) {
       await this.resourceRegistrar.register(toBeInstalled, bms.id);
     }
@@ -117,6 +126,11 @@ export class Service {
         observation.manifestUrl
       );
 
+      await this.observationRepository.check(
+        observation.manifestUrl,
+        new Date()
+      );
+
       if (!updates.bmses) continue;
       for (const updatedBms of updates.bmses) {
         const latestCheck = await this.bmsCheckRepository.fetch({
@@ -127,7 +141,6 @@ export class Service {
           ? !isUpToDate(updatedBms.updatedAt, latestCheck.checkedAt)
           : false;
 
-        // groupIDが指定されていれば、レコードからgroup引っ張ってきて自動追加対象か調べる
         let belongsToAutoAddingGroup = false;
         if (updatedBms.domainScopedGroupId) {
           const corrGroup = await this.groupRepository.fetch({
@@ -163,16 +176,3 @@ const createIdentity = (domain: string, domainScopedId: string) => {
 
   return identity;
 };
-
-const resourceFilterConfig: ResourceFilterConfig = {
-  core: {
-    selectionMethod: "latest",
-  },
-  patch: {
-    enabled: false,
-  },
-  additional: {
-    enabled: true,
-  },
-};
-const resourceFilter = new ResourceFilter(resourceFilterConfig);
