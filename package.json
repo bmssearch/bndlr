@@ -1,8 +1,8 @@
 {
-  "name": "boots",
-  "productName": "boots",
-  "version": "1.0.0",
-  "description": "My Electron application description",
+  "name": "bndlr",
+  "productName": "bndlr",
+  "version": "0.0.1",
+  "description": "BMS bundle installer",
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
@@ -19,12 +19,20 @@
   "license": "MIT",
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "protocols": [
+          {
+            "protocol": "bndlr",
+            "name": "bndlr",
+            "schemes": "bndlr"
+          }
+        ]
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "boots"
+            "name": "bndlr"
           }
         },
         {
@@ -115,6 +123,7 @@
     "@bmssearch/bms-bundle-spec": "file:../bms-bundle-spec-js",
     "auto-launch": "^5.0.5",
     "clsx": "^1.1.1",
+    "electron-is-dev": "^2.0.0",
     "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^7.0.3",
     "electron-tray-window": "^1.2.5",
@@ -130,6 +139,7 @@
     "throttle-debounce": "^3.0.1",
     "umzug": "^3.0.0-beta.15",
     "unzipper": "^0.10.11",
+    "url-router": "^13.0.0",
     "uuid": "^8.3.2"
   }
 }
