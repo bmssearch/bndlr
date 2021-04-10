@@ -1,0 +1,33 @@
+@import "../../theme.scss";
+
+.wrapper {
+  background-color: $MIDNIGHT_50;
+  border-right: 1px solid $MIDNIGHT_BORDER;
+  padding: 16px 8px;
+}
+
+.tab {
+  display: block;
+  width: 100%;
+  text-align: left;
+  outline: none;
+  border: none;
+  font-size: 14px;
+  padding: 8px;
+  border-radius: 4px;
+  background: none;
+
+  margin-bottom: 4px;
+
+  &.active {
+    font-weight: bold;
+    background: $MIDNIGHT_400;
+  }
+
+  &:hover {
+    background: $MIDNIGHT_300;
+  }
+  &:active {
+    background: $MIDNIGHT_400;
+  }
+}

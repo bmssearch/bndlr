@@ -9,6 +9,14 @@ export const send = <K extends keyof BridgeEventList>(
   ipcRenderer.send(key, params);
 };
 
+export const invoke = async <K extends keyof BridgeEventList, R>(
+  key: K,
+  params: BridgeEventList[K]
+): Promise<R> => {
+  const res = await ipcRenderer.invoke(key, params);
+  return res;
+};
+
 export type Handler<K extends keyof BridgeEventList> = (
   event: IpcRendererEvent,
   params: BridgeEventList[K]

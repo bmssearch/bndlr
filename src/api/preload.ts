@@ -1,13 +1,37 @@
-import { Listener, listen, send } from "./helpers";
+import { Listener, invoke, listen, send } from "./helpers";
 
 import { Installation } from "../core/models/Installation";
+import { Preferences } from "../core/models/Preference";
 import { contextBridge } from "electron";
 
 export class ContextBridgeApi {
   public static readonly API_KEY = "api";
 
+  public selectDirectory = async () => {
+    const directory = await invoke<"selectDirectory", string>(
+      "selectDirectory",
+      {}
+    );
+    return directory;
+  };
+  public openMenu = async () => {
+    send("openMenu", {});
+  };
+
   public test = (): void => {
     send("test", {});
+  };
+
+  public fetchPreferences = () => {
+    send("fetchPreferences", {});
+  };
+  public listenToPreferences: Listener<"preferencesLoaded"> = (handler) =>
+    listen("preferencesLoaded", handler);
+  public setPreferences = (preferences: Preferences) => {
+    send("setPreferences", { preferences });
+  };
+  public closePreferencesWindow = () => {
+    send("closePreferencesWindow", {});
   };
 
   public requestAddBms = (manifestUrl: string): void => {
@@ -18,29 +42,22 @@ export class ContextBridgeApi {
     send("requestAddGroup", { manifestUrl });
   };
 
-  public requestCheckUpdates = () => {
-    send("requestCheckUpdates", {});
+  public fetchInstallations = () => {
+    send("fetchInstallations", {});
   };
 
   public acceptProposedInstallation = (installations: Installation[]): void => {
     send("acceptProposedInstallations", { installations });
   };
 
-  public listenToInstallationsUpdate: Listener<"installationsUpdated"> = (
-    handler
-  ) => {
-    return listen("installationsUpdated", handler);
-  };
+  public listenToInstallations: Listener<"installationsLoaded"> = (handler) =>
+    listen("installationsLoaded", handler);
 
-  public listenToInstallationProgresses: Listener<"installationProgressesUpdated"> = (
+  public listenToInstallationProgresses: Listener<"installationProgressesLoaded"> = (
     handler
-  ) => {
-    return listen("installationProgressesUpdated", handler);
-  };
+  ) => listen("installationProgressesLoaded", handler);
 
-  public listenToTest: Listener<"test"> = (handler) => {
-    return listen("test", handler);
-  };
+  public listenToTest: Listener<"test"> = (handler) => listen("test", handler);
 }
 
 contextBridge.exposeInMainWorld(

@@ -30,8 +30,10 @@ export class TemporaryDiskProvider {
 }
 
 export class TemporaryDiskProviderFactory {
-  public create = (rootPath: string): TemporaryDiskProvider => {
-    const path = nodePath.join(rootPath, "_tmp-" + uuidv4());
+  constructor(private rootPath: string) {}
+
+  public create = (): TemporaryDiskProvider => {
+    const path = nodePath.join(this.rootPath, "_tmp-" + uuidv4());
     return new TemporaryDiskProvider(path);
   };
 }

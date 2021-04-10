@@ -1,4 +1,3 @@
-import AutoLaunch from "auto-launch";
 import { app } from "electron";
 import { onAppReady } from "./onReady";
 
@@ -7,11 +6,5 @@ if (require("electron-squirrel-startup")) {
   // eslint-disable-line global-require
   app.quit();
 }
-
-const launcher = new AutoLaunch({ name: "bndlr" });
-
-launcher.isEnabled().then((enabled) => {
-  console.log("enabled:", enabled);
-});
 
 app.on("ready", onAppReady);

@@ -39,7 +39,7 @@ export class ResourceRegistrar {
     }
 
     const {
-      resourcePreferences: { downloadUnsupportedDomains },
+      downloadUnsupportedDomains,
     } = await this.preferencesRepository.get();
     const status: InstallationStatus = downloadUnsupportedDomains.includes(
       urlDomain(resource.url)

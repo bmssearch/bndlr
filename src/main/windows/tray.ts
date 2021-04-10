@@ -6,4 +6,5 @@ export const setTray = () => {
   tray = new Tray("./example.jpg");
   tray.setTitle("baskett");
   tray.setToolTip("baskett");
+  return tray;
 };

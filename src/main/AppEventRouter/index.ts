@@ -1,14 +1,18 @@
+import { BrowserWindow, app } from "electron";
+
 import { AppEventEmitter } from "./types";
 import { BridgeEventRelay } from "../BridgeEventRelay";
 import { InstallationProgress } from "../../core/models/InstallationProgress";
 import { Service } from "../../core/app/Service";
+import { createPreferencesWindow } from "../windows/preferences";
 import { throttle } from "throttle-debounce";
 
 export class AppEventRouter {
   constructor(
     private emitter: AppEventEmitter,
     private service: Service,
-    private relay: BridgeEventRelay
+    private relay: BridgeEventRelay,
+    private preferencesWindow: BrowserWindow
   ) {}
 
   public listen = () => {
@@ -34,9 +38,28 @@ export class AppEventRouter {
       });
     });
 
+    this.emitter.on("reloadPreferences", async () => {
+      const preferences = await this.service.fetchPreferences();
+      this.relay.deliver("preferencesLoaded", { preferences });
+    });
+    this.emitter.on("setPreferences", async ({ preferences }) => {
+      await this.service.setPreferences(preferences);
+    });
+    this.emitter.on("openPreferencesWindow", () => {
+      if (this.preferencesWindow && !this.preferencesWindow.isDestroyed()) {
+        this.preferencesWindow.show();
+        this.preferencesWindow.focus();
+      } else {
+        this.preferencesWindow = createPreferencesWindow(this.relay);
+      }
+    });
+    this.emitter.on("closePreferencesWindow", async () => {
+      this.preferencesWindow.destroy();
+    });
+
     this.emitter.on("reloadInstallations", async () => {
       const installations = await this.service.fetchInstallations();
-      this.relay.deliver("installationsUpdated", {
+      this.relay.deliver("installationsLoaded", {
         installations,
       });
     });
@@ -87,7 +110,7 @@ export class AppEventRouter {
           }
         });
 
-        this.relay.deliver("installationProgressesUpdated", {
+        this.relay.deliver("installationProgressesLoaded", {
           installationProgresses,
         });
       })
@@ -101,6 +124,10 @@ export class AppEventRouter {
     this.emitter.on("failInstallation", async ({ installationId }) => {
       await this.service.updateInstallationStatus(installationId, "failed");
       this.emitter.emit("reloadInstallations", {});
+    });
+
+    this.emitter.on("quitApp", () => {
+      app.exit();
     });
   };
 }

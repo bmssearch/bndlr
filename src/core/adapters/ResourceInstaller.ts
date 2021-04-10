@@ -3,8 +3,6 @@ import { ExtractorFactory } from "./Extractor";
 import { TemporaryDiskProviderFactory } from "./TemporaryDiskProvider";
 import fse from "fs-extra";
 
-const WORKING_DIR = "F:\\temporary\\BMS";
-
 interface ConnectingProgress {
   type: "connecting";
 }
@@ -41,7 +39,7 @@ export class ResourceInstaller {
   ) {}
 
   public install = async (url: string, dist: string): Promise<void> => {
-    const tdp = this.tdpFactory.create(WORKING_DIR);
+    const tdp = this.tdpFactory.create();
 
     const downloader = this.downloaderFactory.create();
     downloader.onProgress((progress) => {

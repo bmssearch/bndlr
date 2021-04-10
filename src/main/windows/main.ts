@@ -5,13 +5,16 @@ import { BrowserWindow } from "electron";
 declare const MAIN_WINDOW_WEBPACK_ENTRY: any;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
-export const createMainWindow = (relay: BridgeEventRelay): void => {
+export const createMainWindow = (relay: BridgeEventRelay) => {
   const mainWindow = new BrowserWindow({
     height: 600,
-    width: 800,
+    width: 600,
+    skipTaskbar: true,
+    frame: false,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
+    show: false,
   });
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
@@ -27,4 +30,6 @@ export const createMainWindow = (relay: BridgeEventRelay): void => {
   });
 
   mainWindow.webContents.openDevTools();
+
+  return mainWindow;
 };

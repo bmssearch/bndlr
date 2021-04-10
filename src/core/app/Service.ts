@@ -4,6 +4,7 @@ import {
 } from "../models/Identity";
 import { Installation, InstallationStatus } from "../models/Installation";
 
+import AutoLaunch from "auto-launch";
 import { BmsCheckRepository } from "../repositories/BmsCheckRepository";
 import { BmsManifestRepository } from "../repositories/BmsManifestRepository";
 import { BmsRegistrar } from "./BmsRegistrar";
@@ -15,6 +16,7 @@ import { InstallationRepository } from "../repositories/InstallationRepository";
 import { InstallationWorker } from "../workers/InstallationWorker";
 import { ObservationRegistrar } from "./ObservationRegistrar";
 import { ObservationRepository } from "../repositories/ObservationRepository";
+import { Preferences } from "../models/Preference";
 import { PreferencesRepository } from "../repositories/PreferencesRepository";
 import { ResourceRegistrar } from "./ResourceRegistrar";
 import { ResourceRepository } from "../repositories/ResourceRepository";
@@ -25,6 +27,7 @@ import { isUpToDate } from "../utils/date";
 export class Service {
   constructor(
     private preferencesRepository: PreferencesRepository,
+    private autoLaunch: AutoLaunch,
     private installationWorker: InstallationWorker,
 
     private bmsManifestRepository: BmsManifestRepository,
@@ -47,6 +50,23 @@ export class Service {
   public putInstallationIntoTaskQueue = async (installation: Installation) => {
     // InstallationProgressを生成
     this.installationWorker.put(installation);
+  };
+
+  public fetchPreferences = async () => {
+    return await this.preferencesRepository.get();
+  };
+  public setPreferences = async (preferences: Preferences) => {
+    await this.preferencesRepository.set(preferences);
+    const autoLaunchEnabled = await this.autoLaunch.isEnabled();
+    if (preferences.launchOnStartup) {
+      if (!autoLaunchEnabled) {
+        this.autoLaunch.enable();
+      }
+    } else {
+      if (autoLaunchEnabled) {
+        this.autoLaunch.disable();
+      }
+    }
   };
 
   public fetchInstallations = async (): Promise<Installation[]> => {
@@ -87,9 +107,17 @@ export class Service {
     }
 
     const {
-      resourcePreferences: resourcePreference,
+      coreResourceSelectionMethod,
+      installsPatchResources,
+      installsAdditionalResources,
+      downloadUnsupportedDomains,
     } = await this.preferencesRepository.get();
-    const resourceSelector = new ResourceSelector({ ...resourcePreference });
+    const resourceSelector = new ResourceSelector({
+      coreResourceSelectionMethod,
+      installsPatchResources,
+      installsAdditionalResources,
+      downloadUnsupportedDomains,
+    });
     const resourcesToBeInstalled = resourceSelector.select(
       bmsManifest.resources
     );

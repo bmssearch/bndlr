@@ -1,5 +1,6 @@
 import { EventEmitter } from "events";
 import { Installation } from "../../core/models/Installation";
+import { Preferences } from "../../core/models/Preference";
 import { QueueItem } from "../../core/adapters/Queue";
 import { ResourceInstallerProgress } from "../../core/adapters/ResourceInstaller";
 
@@ -11,12 +12,20 @@ export interface AppEventList {
   checkUpdates: Record<string, never>;
   execInstallations: { installations: Installation[] };
 
+  reloadPreferences: Record<string, never>;
+  setPreferences: { preferences: Preferences };
+  openPreferencesWindow: Record<string, never>;
+  closePreferencesWindow: Record<string, never>;
+
   reloadInstallations: Record<string, never>;
+
   progressOnInstallations: {
     items: QueueItem<Installation, ResourceInstallerProgress>[];
   };
   finishInstallation: { installationId: number };
   failInstallation: { installationId: number };
+
+  quitApp: Record<string, never>;
 }
 
 export class AppEventEmitter extends EventEmitter {

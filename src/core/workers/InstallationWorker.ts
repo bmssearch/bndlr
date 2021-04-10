@@ -32,9 +32,7 @@ export class InstallationWorker {
           onProgress(progress);
         });
 
-        const {
-          resourcePreferences: { installationDist },
-        } = await this.preferenceRepository.get();
+        const { installationDist } = await this.preferenceRepository.get();
         // distが無効だったら全部ダメなのでFATAL扱いにする
         await resourceInstaller.install(entity.resource.url, installationDist);
         this.finishListeners.forEach((listener) => {

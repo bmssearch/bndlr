@@ -14,11 +14,16 @@ p,
 figure,
 blockquote,
 dl,
-dd {
+dd,
+ul,
+ol {
   margin: 0;
+  padding: 0;
 }
 ul[role="list"],
-ol[role="list"] {
+ol[role="list"],
+li {
+  padding: 0;
   list-style: none;
 }
 html:focus-within {

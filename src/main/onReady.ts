@@ -1,4 +1,4 @@
-import { BrowserWindow, Menu, app, ipcMain } from "electron";
+import { BrowserWindow, app, ipcMain } from "electron";
 import {
   ResourceInstallerFactory,
   ResourceInstallerProgress,
@@ -11,6 +11,7 @@ import {
 
 import { AppEventEmitter } from "./AppEventRouter/types";
 import { AppEventRouter } from "./AppEventRouter";
+import AutoLaunch from "auto-launch";
 import { BmsRegistrar } from "../core/app/BmsRegistrar";
 import { BridgeEventRelay } from "./BridgeEventRelay";
 import { DownloaderFactory } from "../core/adapters/Downloader";
@@ -35,10 +36,13 @@ import { Service } from "../core/app/Service";
 import { StorePreferencesRepository } from "../core/repositories/PreferencesRepository";
 import { TemporaryDiskProviderFactory } from "../core/adapters/TemporaryDiskProvider";
 import { createMainWindow } from "./windows/main";
-import { createSettingsWindow } from "./windows/settings";
 import { initialize } from "./initialize";
+import path from "path";
 import { setTray } from "./windows/tray";
+//@ts-ignore
+import trayWindow from "electron-tray-window";
 
+const autoLaunch = new AutoLaunch({ name: "bndlr" });
 const preferencesRepository = new StorePreferencesRepository();
 
 const bmsManifestRepository = new MockBmsManifestRepository(mockBmsManifest);
@@ -72,7 +76,9 @@ const resourceRegistrar = new ResourceRegistrar(
 );
 const observationRegistrar = new ObservationRegistrar(observationRepository);
 
-const tpdFactory = new TemporaryDiskProviderFactory();
+const tpdFactory = new TemporaryDiskProviderFactory(
+  path.join(app.getPath("userData"), "temp")
+);
 const downloaderFactory = new DownloaderFactory();
 const extractorFactory = new ExtractorFactory();
 const resourceInstallerFactory = new ResourceInstallerFactory(
@@ -81,8 +87,22 @@ const resourceInstallerFactory = new ResourceInstallerFactory(
   extractorFactory
 );
 
+let mainWindow: BrowserWindow;
+let preferencesWindow: BrowserWindow;
+
 export const onAppReady = async () => {
   await initialize();
+  const { launchOnStartup } = await preferencesRepository.get();
+  const autoLaunchEnabled = await autoLaunch.isEnabled();
+  if (launchOnStartup) {
+    if (!autoLaunchEnabled) {
+      autoLaunch.enable();
+    }
+  } else {
+    if (autoLaunchEnabled) {
+      autoLaunch.disable();
+    }
+  }
 
   const installationQueue = new EventEmitterQueue<
     Installation,
@@ -101,6 +121,7 @@ export const onAppReady = async () => {
 
   const service = new Service(
     preferencesRepository,
+    autoLaunch,
 
     installationWorker,
 
@@ -127,7 +148,12 @@ export const onAppReady = async () => {
   const relay = new BridgeEventRelay(rendererEventEmitter, appEventEmitter);
   relay.listen();
 
-  const router = new AppEventRouter(appEventEmitter, service, relay);
+  const router = new AppEventRouter(
+    appEventEmitter,
+    service,
+    relay,
+    preferencesWindow
+  );
   router.listen();
 
   installationWorker.addChangeListener((items) => {
@@ -146,14 +172,20 @@ export const onAppReady = async () => {
   });
   observationWorker.start();
 
-  setTray();
-  createMainWindow(relay);
-  createSettingsWindow(relay);
+  const tray = setTray();
+  mainWindow = createMainWindow(relay);
+  mainWindow.on("blur", () => {
+    mainWindow.hide();
+  });
 
-  Menu.setApplicationMenu(null);
+  trayWindow.setOptions({ tray, window: mainWindow });
+  trayWindow.setWindowSize({ margin_x: 10, margin_y: 10 });
+
+  // Menu.setApplicationMenu(null);
 
   app.on("window-all-closed", () => {
     if (process.platform !== "darwin") {
+      tray.destroy();
       app.quit();
     }
   });

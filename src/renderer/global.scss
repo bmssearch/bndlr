@@ -1,0 +1,43 @@
+@import "./theme.scss";
+
+body {
+  font: caption;
+  font-size: 14px;
+}
+
+label {
+  display: block;
+}
+
+input {
+  outline: none;
+  border: none;
+}
+
+input[type="text"],
+input[type="number"] {
+  display: block;
+  width: 100%;
+  height: 32px;
+  border: 2px solid $MIDNIGHT_BORDER_HEAVY;
+  border-radius: 4px;
+  padding: 6px 6px;
+}
+
+textarea {
+  display: block;
+  width: 100%;
+  border: 2px solid $MIDNIGHT_BORDER_HEAVY;
+  border-radius: 4px;
+  padding: 6px;
+  line-height: 1.5;
+
+  &:focus {
+    outline: none;
+    border: 2px solid $MIDNIGHT_500;
+  }
+}
+
+button {
+  height: 32px;
+}

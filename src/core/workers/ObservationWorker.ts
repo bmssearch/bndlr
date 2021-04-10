@@ -17,14 +17,12 @@ export class ObservationWorker {
     this.timer = setInterval(async () => {
       const now = new Date();
 
-      const {
-        observationPreferences: { intervalMin },
-      } = await this.preferencesRepository.get();
+      const { observationIntervalMin } = await this.preferencesRepository.get();
 
       const observations = await this.observationRepository.list();
       if (
         observations.some((o) =>
-          isOverInterval(o.checkedAt, now, intervalMin * 60)
+          isOverInterval(o.checkedAt, now, observationIntervalMin * 60)
         )
       ) {
         this.onDetectUpdate.forEach((v) => v());
@@ -32,7 +30,7 @@ export class ObservationWorker {
     }, OBSERVATION_CHECK_INTERVAL_MIN * 60 * 1000);
   };
 
-  public clear = () => {
+  public close = () => {
     if (this.timer) {
       clearInterval(this.timer);
     }

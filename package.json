@@ -59,9 +59,9 @@
                   }
                 },
                 {
-                  "html": "./src/renderer/settings/index.html",
-                  "js": "./src/renderer/settings/index.ts",
-                  "name": "settings_window",
+                  "html": "./src/renderer/preferences/index.html",
+                  "js": "./src/renderer/preferences/index.tsx",
+                  "name": "preferences_window",
                   "preload": {
                     "js": "./src/api/preload.ts"
                   }
@@ -117,7 +117,9 @@
     "clsx": "^1.1.1",
     "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^7.0.3",
+    "electron-tray-window": "^1.2.5",
     "follow-redirects": "^1.13.3",
+    "formik": "^2.2.6",
     "fs-extra": "^8.1.0",
     "lodash": "^4.17.21",
     "luxon": "^1.26.0",

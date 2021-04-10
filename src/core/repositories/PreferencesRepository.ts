@@ -7,18 +7,17 @@ export interface PreferencesRepository {
 }
 
 const initialPreferences: Preferences = {
-  resourcePreferences: {
-    coreResourceSelectionMethod: "first",
-    installsPatchResources: false,
-    installsAdditionalResources: true,
+  installationDist: "",
 
-    downloadUnsupportedDomains: [],
-    installationDist: "",
-  },
-  manifestPreferences: {
-    identicalDomainsList: [],
-  },
-  observationPreferences: { intervalMin: 60 },
+  coreResourceSelectionMethod: "first",
+  installsPatchResources: false,
+  installsAdditionalResources: true,
+
+  downloadUnsupportedDomains: ["drive.google.com"],
+
+  identicalDomainsList: [],
+  observationIntervalMin: 60,
+  launchOnStartup: true,
 };
 
 export class StorePreferencesRepository {
