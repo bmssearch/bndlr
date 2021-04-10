@@ -11,5 +11,5 @@ module.exports = {
   resolve: {
     extensions: [".js", ".ts", ".jsx", ".tsx", ".scss", ".json"],
   },
-  externals: ["sqlite3"],
+  externals: ["sqlite3", "pg-hstore"],
 };

@@ -1,7 +1,7 @@
 {
   "name": "bndlr",
   "productName": "bndlr",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "BMS bundle installer",
   "main": ".webpack/main",
   "scripts": {
@@ -16,15 +16,21 @@
     "name": "q/stol",
     "email": "hsgw@qstol.info"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bmssearch/bndlr.git"
+  },
+  "private": true,
   "license": "MIT",
   "config": {
     "forge": {
       "packagerConfig": {
         "protocols": [
           {
-            "protocol": "bndlr",
             "name": "bndlr",
-            "schemes": "bndlr"
+            "schemes": [
+              "bndlr"
+            ]
           }
         ]
       },
@@ -52,14 +58,6 @@
           "platforms": [
             "darwin"
           ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
         }
       ],
       "plugins": [
@@ -100,6 +98,7 @@
     "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
     "@electron-forge/maker-zip": "^6.0.0-beta.54",
     "@electron-forge/plugin-webpack": "6.0.0-beta.54",
+    "@electron-forge/publisher-github": "^6.0.0-beta.54",
     "@marshallofsound/webpack-asset-relocator-loader": "^0.5.0",
     "@types/auto-launch": "^5.0.1",
     "@types/follow-redirects": "^1.13.0",
@@ -151,6 +150,7 @@
     "throttle-debounce": "^3.0.1",
     "umzug": "^3.0.0-beta.15",
     "unzipper": "^0.10.11",
+    "update-electron-app": "^2.0.1",
     "url-router": "^13.0.0",
     "uuid": "^8.3.2"
   }

@@ -38,6 +38,7 @@ import { TemporaryDiskProviderFactory } from "../core/adapters/TemporaryDiskProv
 import { createMainWindow } from "./windows/main";
 import { initialize } from "./initialize";
 import path from "path";
+import { sequelize } from "../core/adapters/database";
 import { setTray } from "./windows/tray";
 //@ts-ignore
 import trayWindow from "electron-tray-window";
@@ -194,5 +195,9 @@ export const onAppReady = async () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createMainWindow(relay);
     }
+  });
+
+  app.on("quit", async () => {
+    await sequelize.close();
   });
 };
