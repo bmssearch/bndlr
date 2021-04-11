@@ -1,6 +1,7 @@
+import { IpcMainEvent, ipcMain } from "electron";
+
 import { BridgeEventList } from "../../api/events";
 import { EventEmitter } from "events";
-import { IpcMainEvent } from "electron";
 
 export class RelayEventEmitter extends EventEmitter {
   // メソッド本体。元々のemitメソッドを踏襲している
@@ -9,18 +10,30 @@ export class RelayEventEmitter extends EventEmitter {
   }
 }
 
-export type BridgeEventHandler<K extends keyof BridgeEventList> = (
+// overwriter for typings
+export type IpcMainEventHandler<K extends keyof BridgeEventList> = (
   event: IpcMainEvent,
   params: BridgeEventList[K]
 ) => void;
 
-export class BridgeEventEmitter extends EventEmitter {
+export class IpcMainEventEmitter extends EventEmitter {
+  public handle<K extends keyof BridgeEventList>(
+    channel: K,
+    handler: (event: IpcMainEvent, params: BridgeEventList[K]) => any
+  ): any;
+  public handle(
+    channel: keyof BridgeEventList,
+    handler: (...args: any[]) => any
+  ) {
+    return ipcMain.handle(channel, handler);
+  }
+
   public on<K extends keyof BridgeEventList>(
     channel: K,
-    handler: BridgeEventHandler<K>
+    handler: IpcMainEventHandler<K>
   ): any;
   public on(channel: keyof BridgeEventList, handler: (...args: any[]) => void) {
-    return super.on(channel, handler);
+    return ipcMain.on(channel, handler);
   }
 
   public emit<K extends keyof BridgeEventList>(
@@ -28,6 +41,6 @@ export class BridgeEventEmitter extends EventEmitter {
     params: BridgeEventList[K]
   ): boolean;
   public emit(event: keyof BridgeEventList, ...args: any[]) {
-    return super.emit(event, ...args);
+    return ipcMain.emit(event, ...args);
   }
 }

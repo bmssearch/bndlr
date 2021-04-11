@@ -1,10 +1,9 @@
-import { BrowserWindow, app } from "electron";
-
 import { AppEventEmitter } from "./types";
 import { BridgeEventRelay } from "../BridgeEventRelay";
 import { InstallationProgress } from "../../core/models/InstallationProgress";
+import { PreferencesWindow } from "../windows/PreferencesWindow";
 import { Service } from "../../core/app/Service";
-import { createPreferencesWindow } from "../windows/preferences";
+import { app } from "electron";
 import { throttle } from "throttle-debounce";
 
 export class AppEventRouter {
@@ -12,7 +11,7 @@ export class AppEventRouter {
     private emitter: AppEventEmitter,
     private service: Service,
     private relay: BridgeEventRelay,
-    private preferencesWindow: BrowserWindow
+    private preferencesWindow: PreferencesWindow
   ) {}
 
   public listen = () => {
@@ -46,15 +45,10 @@ export class AppEventRouter {
       await this.service.setPreferences(preferences);
     });
     this.emitter.on("openPreferencesWindow", () => {
-      if (this.preferencesWindow && !this.preferencesWindow.isDestroyed()) {
-        this.preferencesWindow.show();
-        this.preferencesWindow.focus();
-      } else {
-        this.preferencesWindow = createPreferencesWindow(this.relay);
-      }
+      this.preferencesWindow.show();
     });
     this.emitter.on("closePreferencesWindow", async () => {
-      this.preferencesWindow.destroy();
+      this.preferencesWindow.close();
     });
 
     this.emitter.on("reloadInstallations", async () => {

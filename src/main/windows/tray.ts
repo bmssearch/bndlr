@@ -1,10 +1,16 @@
 import { Tray } from "electron";
 import path from "path";
-let tray: Tray | null = null;
 
-export const setTray = () => {
-  tray = new Tray(path.join(__dirname, "assets/icon.png"));
-  tray.setTitle("bndlr");
-  tray.setToolTip("bndlr");
-  return tray;
-};
+export class AppTray {
+  public tray: Tray | null = null;
+
+  public show = () => {
+    this.tray = new Tray(path.join(__dirname, "assets/icon.png"));
+    this.tray.setTitle("bndlr");
+    this.tray.setToolTip("bndlr");
+  };
+
+  public destroy = () => {
+    this.tray?.destroy();
+  };
+}

@@ -19,4 +19,8 @@ export class DatabaseConnector {
 
     rawMigrate(this.rawDb);
   };
+
+  public close = () => {
+    this.rawDb?.close();
+  };
 }

@@ -1,26 +1,25 @@
-import { BridgeEventEmitter, RelayEventEmitter } from "./types";
-import { Menu, dialog, ipcMain } from "electron";
+import { IpcMainEventEmitter, RelayEventEmitter } from "./types";
+import { Menu, dialog } from "electron";
 
 import { AppEventEmitter } from "../AppEventRouter/types";
 import { BridgeEventList } from "../../api/events";
 
 export class BridgeEventRelay {
   private relayEventEmitter: RelayEventEmitter;
+  private ipcMainEmitter: IpcMainEventEmitter;
 
-  constructor(
-    private bridgeEventEmitter: BridgeEventEmitter,
-    private appEventEmitter: AppEventEmitter
-  ) {
+  constructor(private appEventEmitter: AppEventEmitter) {
     this.relayEventEmitter = new RelayEventEmitter();
+    this.ipcMainEmitter = new IpcMainEventEmitter();
   }
 
   public listen = () => {
-    this.bridgeEventEmitter.on("test", () => {
+    this.ipcMainEmitter.on("test", () => {
       this.appEventEmitter.emit("test", {});
       console.log("テストだよ");
     });
 
-    ipcMain.handle("selectDirectory", async () => {
+    this.ipcMainEmitter.handle("selectDirectory", async () => {
       const res = await dialog.showOpenDialog({
         title: "保存先",
         properties: ["openDirectory", "createDirectory"],
@@ -29,7 +28,7 @@ export class BridgeEventRelay {
       return res.filePaths[0];
     });
 
-    this.bridgeEventEmitter.on("openMenu", () => {
+    this.ipcMainEmitter.on("openMenu", () => {
       const menu = Menu.buildFromTemplate([
         {
           label: "設定",
@@ -54,34 +53,31 @@ export class BridgeEventRelay {
       menu.popup();
     });
 
-    this.bridgeEventEmitter.on("fetchPreferences", () => {
+    this.ipcMainEmitter.on("fetchPreferences", () => {
       this.appEventEmitter.emit("reloadPreferences", {});
     });
-    this.bridgeEventEmitter.on("setPreferences", (event, { preferences }) => {
+    this.ipcMainEmitter.on("setPreferences", (event, { preferences }) => {
       this.appEventEmitter.emit("setPreferences", { preferences });
     });
-    this.bridgeEventEmitter.on("closePreferencesWindow", () => {
+    this.ipcMainEmitter.on("closePreferencesWindow", () => {
       this.appEventEmitter.emit("closePreferencesWindow", {});
     });
 
-    this.bridgeEventEmitter.on(
-      "requestAddBms",
-      async (event, { manifestUrl }) => {
-        this.appEventEmitter.emit("addBms", { manifestUrl });
-      }
-    );
+    this.ipcMainEmitter.on("requestAddBms", async (event, { manifestUrl }) => {
+      this.appEventEmitter.emit("addBms", { manifestUrl });
+    });
 
-    this.bridgeEventEmitter.on(
+    this.ipcMainEmitter.on(
       "requestAddGroup",
       async (event, { manifestUrl }) => {
         this.appEventEmitter.emit("addGroup", { manifestUrl });
       }
     );
 
-    this.bridgeEventEmitter.on("fetchInstallations", () => {
+    this.ipcMainEmitter.on("fetchInstallations", () => {
       this.appEventEmitter.emit("reloadInstallations", {});
     });
-    this.bridgeEventEmitter.on(
+    this.ipcMainEmitter.on(
       "acceptProposedInstallations",
       async (event, { installations }) => {
         this.appEventEmitter.emit("execInstallations", { installations });

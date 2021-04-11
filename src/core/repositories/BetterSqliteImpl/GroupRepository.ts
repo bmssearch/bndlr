@@ -28,7 +28,6 @@ export class BetterSqliteGroupRepository implements GroupRepository {
       return idfrs.map((idfr) => st.get(idfr.domain, idfr.domainScopedId));
     });
     const dbGroups: DBGroup[] = tx(identifiers).filter((v) => !!v);
-    console.log(dbGroups);
     return dbGroups.map(dbToGroup);
   };
 

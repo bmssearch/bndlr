@@ -1,4 +1,3 @@
-import { BrowserWindow, app, ipcMain } from "electron";
 import {
   ResourceInstallerFactory,
   ResourceInstallerProgress,
@@ -11,6 +10,7 @@ import {
 
 import { AppEventEmitter } from "./AppEventRouter/types";
 import { AppEventRouter } from "./AppEventRouter";
+import { AppTray } from "./windows/tray";
 import AutoLaunch from "auto-launch";
 import { BetterSqlBmsRepository } from "../core/repositories/BetterSqliteImpl/BmsRepository";
 import { BetterSqliteBmsCheckRepository } from "../core/repositories/BetterSqliteImpl/BmsCheckRepository";
@@ -19,28 +19,29 @@ import { BetterSqliteInstallationRepository } from "../core/repositories/BetterS
 import { BetterSqliteObservationRepository } from "../core/repositories/BetterSqliteImpl/ObservationRepository";
 import { BetterSqliteResourceRepository } from "../core/repositories/BetterSqliteImpl/ResourceRepository";
 import { BmsRegistrar } from "../core/app/BmsRegistrar";
+import { BndlrApp } from "./BndlrApp";
 import { BridgeEventRelay } from "./BridgeEventRelay";
 import { DatabaseConnector } from "../core/adapters/bettersqlite";
+import { DeeplinkHandler } from "./DeeplinkHandler";
 import { DownloaderFactory } from "../core/adapters/Downloader";
 import { EventEmitterQueue } from "../core/adapters/Queue";
 import { ExtractorFactory } from "../core/adapters/Extractor";
 import { GroupRegistrar } from "../core/app/GroupRegistrar";
 import { Installation } from "../core/models/Installation";
 import { InstallationWorker } from "../core/workers/InstallationWorker";
+import { MainWindow } from "./windows/MainWindow";
 import { MockBmsManifestRepository } from "../core/repositories/BmsManifestRepository";
 import { MockGroupManifestRepository } from "../core/repositories/GroupManifestRepository";
 import { MockUpdatesManifestRepository } from "../core/repositories/UpdatesManifestRepository";
 import { ObservationRegistrar } from "../core/app/ObservationRegistrar";
 import { ObservationWorker } from "../core/workers/ObservationWorker";
+import { PreferencesWindow } from "./windows/PreferencesWindow";
 import { ResourceRegistrar } from "../core/app/ResourceRegistrar";
 import { Service } from "../core/app/Service";
 import { StorePreferencesRepository } from "../core/repositories/PreferencesRepository";
 import { TemporaryDiskProviderFactory } from "../core/adapters/TemporaryDiskProvider";
-import { createMainWindow } from "./windows/main";
+import { app } from "electron";
 import path from "path";
-import { setTray } from "./windows/tray";
-//@ts-ignore
-import trayWindow from "electron-tray-window";
 
 const dbc = new DatabaseConnector();
 
@@ -89,107 +90,73 @@ const resourceInstallerFactory = new ResourceInstallerFactory(
   extractorFactory
 );
 
-let mainWindow: BrowserWindow;
-let preferencesWindow: BrowserWindow;
+const installationQueue = new EventEmitterQueue<
+  Installation,
+  ResourceInstallerProgress
+>();
 
-export const onAppReady = async () => {
-  dbc.initialize();
+const installationWorker = new InstallationWorker(
+  preferencesRepository,
+  installationQueue,
+  resourceInstallerFactory
+);
 
-  const { launchOnStartup } = await preferencesRepository.get();
-  const autoLaunchEnabled = await autoLaunch.isEnabled();
-  if (launchOnStartup) {
-    if (!autoLaunchEnabled) {
-      autoLaunch.enable();
-    }
-  } else {
-    if (autoLaunchEnabled) {
-      autoLaunch.disable();
-    }
-  }
+const observationWorker = new ObservationWorker(
+  preferencesRepository,
+  observationRepository
+);
 
-  const installationQueue = new EventEmitterQueue<
-    Installation,
-    ResourceInstallerProgress
-  >();
-  const installationWorker = new InstallationWorker(
-    preferencesRepository,
-    installationQueue,
-    resourceInstallerFactory
-  );
+const service = new Service(
+  preferencesRepository,
+  autoLaunch,
 
-  const observationWorker = new ObservationWorker(
-    preferencesRepository,
-    observationRepository
-  );
+  installationWorker,
 
-  const service = new Service(
-    preferencesRepository,
-    autoLaunch,
+  bmsManifestRepository,
+  groupManifestRepository,
+  updatesManifestRepository,
 
-    installationWorker,
+  bmsRepository,
+  bmsCheckRepository,
+  groupRepository,
+  observationRepository,
+  resourceRepoisotry,
+  installationRepository,
 
-    bmsManifestRepository,
-    groupManifestRepository,
-    updatesManifestRepository,
+  bmsRegistrar,
+  groupRegistrar,
+  observationRegistrar,
+  resourceRegistrar
+);
 
-    bmsRepository,
-    bmsCheckRepository,
-    groupRepository,
-    observationRepository,
-    resourceRepoisotry,
-    installationRepository,
+const appEventEmitter = new AppEventEmitter();
+const deeplinkHandler = new DeeplinkHandler(appEventEmitter);
+const relay = new BridgeEventRelay(appEventEmitter);
 
-    bmsRegistrar,
-    groupRegistrar,
-    observationRegistrar,
-    resourceRegistrar
-  );
+const appTray = new AppTray();
+const mainWindow = new MainWindow(relay);
+const preferencesWindow = new PreferencesWindow(relay);
 
-  const appEventEmitter = new AppEventEmitter();
-  const rendererEventEmitter = ipcMain;
+const router = new AppEventRouter(
+  appEventEmitter,
+  service,
+  relay,
+  preferencesWindow
+);
 
-  const relay = new BridgeEventRelay(rendererEventEmitter, appEventEmitter);
-  relay.listen();
+export const bndlrApp = new BndlrApp(
+  preferencesRepository,
+  dbc,
+  autoLaunch,
 
-  const router = new AppEventRouter(
-    appEventEmitter,
-    service,
-    relay,
-    preferencesWindow
-  );
-  router.listen();
+  relay,
+  appEventEmitter,
+  router,
+  deeplinkHandler,
 
-  installationWorker.addChangeListener((items) => {
-    appEventEmitter.emit("progressOnInstallations", { items });
-  });
-  installationWorker.addFinishListener((installationId) => {
-    appEventEmitter.emit("finishInstallation", { installationId });
-  });
-  installationWorker.addErrorListener((installationId) => {
-    appEventEmitter.emit("failInstallation", { installationId });
-  });
-  installationWorker.start();
+  installationWorker,
+  observationWorker,
 
-  observationWorker.addDetectUpdateListener(() => {
-    appEventEmitter.emit("checkUpdates", {});
-  });
-  observationWorker.start();
-
-  const tray = setTray();
-  mainWindow = createMainWindow(relay);
-  mainWindow.on("blur", () => {
-    mainWindow.hide();
-  });
-
-  trayWindow.setOptions({ tray, window: mainWindow });
-  trayWindow.setWindowSize({ margin_x: 10, margin_y: 10 });
-
-  // Menu.setApplicationMenu(null);
-
-  app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") {
-      // tray.destroy();
-      app.quit();
-    }
-  });
-};
+  mainWindow,
+  appTray
+);
