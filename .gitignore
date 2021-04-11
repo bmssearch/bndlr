@@ -1,5 +1,6 @@
 # development
 db.sqlite
+umzug.json
 
 # Logs
 logs

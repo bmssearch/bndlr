@@ -20,6 +20,7 @@ import { BetterSqliteObservationRepository } from "../core/repositories/BetterSq
 import { BetterSqliteResourceRepository } from "../core/repositories/BetterSqliteImpl/ResourceRepository";
 import { BmsRegistrar } from "../core/app/BmsRegistrar";
 import { BridgeEventRelay } from "./BridgeEventRelay";
+import { DatabaseConnector } from "../core/adapters/bettersqlite";
 import { DownloaderFactory } from "../core/adapters/Downloader";
 import { EventEmitterQueue } from "../core/adapters/Queue";
 import { ExtractorFactory } from "../core/adapters/Extractor";
@@ -36,11 +37,12 @@ import { Service } from "../core/app/Service";
 import { StorePreferencesRepository } from "../core/repositories/PreferencesRepository";
 import { TemporaryDiskProviderFactory } from "../core/adapters/TemporaryDiskProvider";
 import { createMainWindow } from "./windows/main";
-import { initialize } from "./initialize";
 import path from "path";
 import { setTray } from "./windows/tray";
 //@ts-ignore
 import trayWindow from "electron-tray-window";
+
+const dbc = new DatabaseConnector();
 
 const autoLaunch = new AutoLaunch({ name: "bndlr" });
 const preferencesRepository = new StorePreferencesRepository();
@@ -53,12 +55,12 @@ const updatesManifestRepository = new MockUpdatesManifestRepository(
   mockUpdatesManifest
 );
 
-const bmsRepository = new BetterSqlBmsRepository();
-const bmsCheckRepository = new BetterSqliteBmsCheckRepository();
-const groupRepository = new BetterSqliteGroupRepository();
-const observationRepository = new BetterSqliteObservationRepository();
-const resourceRepoisotry = new BetterSqliteResourceRepository();
-const installationRepository = new BetterSqliteInstallationRepository();
+const bmsRepository = new BetterSqlBmsRepository(dbc);
+const bmsCheckRepository = new BetterSqliteBmsCheckRepository(dbc);
+const groupRepository = new BetterSqliteGroupRepository(dbc);
+const observationRepository = new BetterSqliteObservationRepository(dbc);
+const resourceRepoisotry = new BetterSqliteResourceRepository(dbc);
+const installationRepository = new BetterSqliteInstallationRepository(dbc);
 
 const bmsRegistrar = new BmsRegistrar(
   bmsManifestRepository,
@@ -91,7 +93,8 @@ let mainWindow: BrowserWindow;
 let preferencesWindow: BrowserWindow;
 
 export const onAppReady = async () => {
-  await initialize();
+  dbc.initialize();
+
   const { launchOnStartup } = await preferencesRepository.get();
   const autoLaunchEnabled = await autoLaunch.isEnabled();
   if (launchOnStartup) {

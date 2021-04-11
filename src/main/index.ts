@@ -1,14 +1,23 @@
 import Router from "url-router";
 import { app } from "electron";
 import isDev from "electron-is-dev";
+import log from "electron-log";
 import { onAppReady } from "./app";
 import path from "path";
+
+console.log("MAIN");
 
 if (require("electron-squirrel-startup")) {
   app.quit();
 }
 
-require("update-electron-app")();
+// 自動アップデート機能は入れているが、コード署名証明書が結構するので一旦無し
+require("update-electron-app")({ logger: log });
+
+process.on("uncaughtException", (err) => {
+  log.error(err);
+  app.quit();
+});
 
 const gotTheLock = app.requestSingleInstanceLock();
 
@@ -27,6 +36,7 @@ if (!gotTheLock) {
   }
 
   app.on("second-instance", (e, argv) => {
+    console.log("SECOND");
     const rawUrl = argv.find((arg) => arg.startsWith("bndlr://"));
     if (!rawUrl) return;
     const url = rawUrl.replace(/^bndlr:\/\//, "");

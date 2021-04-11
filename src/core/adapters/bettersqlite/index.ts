@@ -1,8 +1,22 @@
-import Database from "better-sqlite3";
+import BetterSqlite, { Database } from "better-sqlite3";
+
 import { migrate as rawMigrate } from "./migration";
 
-export const db = new Database("./db.sqlite", { verbose: console.log });
+export class DatabaseConnector {
+  private rawDb?: Database;
 
-db.exec("PRAGMA foreign_keys=true");
+  public db = (): Database => {
+    if (!this.rawDb) {
+      this.initialize();
+    }
 
-export const migrate = () => rawMigrate(db);
+    return this.rawDb!;
+  };
+
+  public initialize = () => {
+    this.rawDb = new BetterSqlite("./db.sqlite", { verbose: console.log });
+    this.rawDb.exec("PRAGMA foreign_keys=true");
+
+    rawMigrate(this.rawDb);
+  };
+}

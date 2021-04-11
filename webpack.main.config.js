@@ -12,7 +12,7 @@ module.exports = {
     rules: require("./webpack.rules"),
   },
   resolve: {
-    extensions: [".js", ".ts", ".jsx", ".tsx", ".scss", ".json"],
+    extensions: [".js", ".ts", ".jsx", ".tsx"],
   },
   plugins: [
     new CopyWebpackPlugin({
