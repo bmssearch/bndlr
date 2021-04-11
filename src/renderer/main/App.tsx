@@ -78,6 +78,20 @@ const App: React.FC = () => {
           />
         );
       })}
+      <button
+        onClick={() => {
+          api.requestAddBms("https://venue.bmssearch.net/boots_updates");
+        }}
+      >
+        aaa
+      </button>
+      <button
+        onClick={() => {
+          api.requestAddGroup("https://venue.bmssearch.net/boots_updates");
+        }}
+      >
+        aaa
+      </button>
     </div>
   );
 };

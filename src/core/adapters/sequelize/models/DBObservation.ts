@@ -1,6 +1,6 @@
 import { DataTypes, Model, Sequelize } from "sequelize";
 
-import { Observation } from "../../../../core/models/Observation";
+import { Observation } from "../../../models/Observation";
 
 export interface DBObservationAttrs {
   manifestUrl: string;

@@ -1,6 +1,6 @@
 import { DataTypes, Model, Sequelize } from "sequelize";
 
-import { BmsCheck } from "../../../../core/models/BmsCheck";
+import { BmsCheck } from "../../../models/BmsCheck";
 
 export interface DBBmsCheckAttrs {
   domain: string;

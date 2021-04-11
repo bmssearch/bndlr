@@ -1,5 +1,8 @@
+import { Bms } from "../core/models/Bms";
 import { BmsManifest } from "../core/models/BmsManifest";
 import { GroupManifest } from "../core/models/GroupManifest";
+import { Installation } from "../core/models/Installation";
+import { Resource } from "../core/models/Resource";
 import { UpdatesManifest } from "../core/models/UpdatesManifest";
 
 export const mockBmsManifest: BmsManifest = {
@@ -8,7 +11,7 @@ export const mockBmsManifest: BmsManifest = {
   domainScopedId: "test_id3",
   title: "Falling Cxte",
   groupManifestUrl: "https://venue.bmssearch.net/bmsshuin3/bbs",
-  updatesManifestUrl: "https://venue.bmssearch.net/boots_updates",
+  updatesManifestUrl: "https://venue.bmssearch.net/boots_updates2",
   resources: [
     {
       name: "通常版",
@@ -28,35 +31,6 @@ export const mockBmsManifest: BmsManifest = {
         "https://drive.google.com/file/d/1BnrKVdL3d9aGwb8pUiT-efut9zxz73H-/view?usp=sharing2",
       type: "additional",
       updatedAt: new Date(),
-    },
-  ],
-};
-
-export const mockBbsBmsManifest = {
-  version: 1,
-
-  id: "test_id3",
-  group_url: "https://venue.bmssearch.net/bmsshuin3/bbs",
-  updates_url: "https://venue.bmssearch.net/boots_updates",
-  resources: [
-    {
-      name: "通常版",
-      url: "https://www.dropbox.com/s/magw392fp7n5v0w/Falling%20Cxte.zip?dl=1",
-      type: "core",
-    },
-    {
-      name: "Drive版",
-      url:
-        "https://drive.google.com/file/d/1BnrKVdL3d9aGwb8pUiT-efut9zxz73H-/view?usp=sharing",
-      type: "core",
-      updated_at: 300,
-    },
-    {
-      name: "Drive版",
-      url:
-        "https://drive.google.com/file/d/1BnrKVdL3d9aGwb8pUiT-efut9zxz73H-/view?usp=sharing2",
-      type: "additional",
-      updated_at: 200,
     },
   ],
 };
@@ -64,8 +38,8 @@ export const mockBbsBmsManifest = {
 export const mockGroupManifest = new GroupManifest({
   manifestUrl: "https://bmssearch.net/aa",
   domain: "bmssearch.net",
-  domainScopedId: "id in bmssearch.ent",
-  name: "すごいプレイリスト",
+  domainScopedId: "id in bmssearch.ent2",
+  name: "すごいプレイリスト2",
   websiteUrl: "website",
   updatesManifestUrl: "erer",
   bmses: [
@@ -95,4 +69,25 @@ export const mockUpdatesManifest = new UpdatesManifest({
       updatedAt: new Date(),
     },
   ],
+});
+
+export const mockBms: Bms = new Bms({
+  id: 1,
+  domain: "ni",
+  domainScopedId: "san",
+  title: "si",
+});
+
+export const mockResource: Resource = new Resource({
+  id: 1,
+  bms: mockBms,
+  url: "https://venue.bmssearch.net/boots_updates",
+  type: "additional",
+});
+
+export const mockInstallation: Installation = new Installation({
+  id: 1,
+  resource: mockResource,
+  status: "proposed",
+  createdAt: new Date(),
 });

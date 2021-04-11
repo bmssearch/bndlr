@@ -1,6 +1,6 @@
 import { DataTypes, Model, Optional, Sequelize } from "sequelize";
 
-import { Group } from "../../../../core/models/Group";
+import { Group } from "../../../models/Group";
 
 export interface DBGroupAttrs {
   id: number;

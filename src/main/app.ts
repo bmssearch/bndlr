@@ -12,6 +12,12 @@ import {
 import { AppEventEmitter } from "./AppEventRouter/types";
 import { AppEventRouter } from "./AppEventRouter";
 import AutoLaunch from "auto-launch";
+import { BetterSqlBmsRepository } from "../core/repositories/BetterSqliteImpl/BmsRepository";
+import { BetterSqliteBmsCheckRepository } from "../core/repositories/BetterSqliteImpl/BmsCheckRepository";
+import { BetterSqliteGroupRepository } from "../core/repositories/BetterSqliteImpl/GroupRepository";
+import { BetterSqliteInstallationRepository } from "../core/repositories/BetterSqliteImpl/InstallationRepository";
+import { BetterSqliteObservationRepository } from "../core/repositories/BetterSqliteImpl/ObservationRepository";
+import { BetterSqliteResourceRepository } from "../core/repositories/BetterSqliteImpl/ResourceRepository";
 import { BmsRegistrar } from "../core/app/BmsRegistrar";
 import { BridgeEventRelay } from "./BridgeEventRelay";
 import { DownloaderFactory } from "../core/adapters/Downloader";
@@ -20,12 +26,6 @@ import { ExtractorFactory } from "../core/adapters/Extractor";
 import { GroupRegistrar } from "../core/app/GroupRegistrar";
 import { Installation } from "../core/models/Installation";
 import { InstallationWorker } from "../core/workers/InstallationWorker";
-import { LocalDbBmsCheckRepository } from "../core/repositories/BmsCheckRepository";
-import { LocalDbBmsRepository } from "../core/repositories/BmsRepository";
-import { LocalDbGroupRepository } from "../core/repositories/GroupRepository";
-import { LocalDbInstallationRepository } from "../core/repositories/InstallationRepository";
-import { LocalDbObservationRepository } from "../core/repositories/ObservationRepository";
-import { LocalDbResourceRepository } from "../core/repositories/ResourceRepository";
 import { MockBmsManifestRepository } from "../core/repositories/BmsManifestRepository";
 import { MockGroupManifestRepository } from "../core/repositories/GroupManifestRepository";
 import { MockUpdatesManifestRepository } from "../core/repositories/UpdatesManifestRepository";
@@ -38,7 +38,6 @@ import { TemporaryDiskProviderFactory } from "../core/adapters/TemporaryDiskProv
 import { createMainWindow } from "./windows/main";
 import { initialize } from "./initialize";
 import path from "path";
-import { sequelize } from "../core/adapters/database";
 import { setTray } from "./windows/tray";
 //@ts-ignore
 import trayWindow from "electron-tray-window";
@@ -54,12 +53,12 @@ const updatesManifestRepository = new MockUpdatesManifestRepository(
   mockUpdatesManifest
 );
 
-const bmsRepository = new LocalDbBmsRepository();
-const bmsCheckRepository = new LocalDbBmsCheckRepository();
-const groupRepository = new LocalDbGroupRepository();
-const observationRepository = new LocalDbObservationRepository();
-const resourceRepoisotry = new LocalDbResourceRepository();
-const installationRepository = new LocalDbInstallationRepository();
+const bmsRepository = new BetterSqlBmsRepository();
+const bmsCheckRepository = new BetterSqliteBmsCheckRepository();
+const groupRepository = new BetterSqliteGroupRepository();
+const observationRepository = new BetterSqliteObservationRepository();
+const resourceRepoisotry = new BetterSqliteResourceRepository();
+const installationRepository = new BetterSqliteInstallationRepository();
 
 const bmsRegistrar = new BmsRegistrar(
   bmsManifestRepository,
@@ -186,18 +185,8 @@ export const onAppReady = async () => {
 
   app.on("window-all-closed", () => {
     if (process.platform !== "darwin") {
-      tray.destroy();
+      // tray.destroy();
       app.quit();
     }
-  });
-
-  app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createMainWindow(relay);
-    }
-  });
-
-  app.on("quit", async () => {
-    await sequelize.close();
   });
 };

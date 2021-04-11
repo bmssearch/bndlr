@@ -4,9 +4,7 @@ import isDev from "electron-is-dev";
 import { onAppReady } from "./app";
 import path from "path";
 
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
-  // eslint-disable-line global-require
   app.quit();
 }
 
@@ -15,12 +13,12 @@ require("update-electron-app")();
 const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
+  console.log("CANNOT GET THE LOCK");
   app.quit();
 } else {
   app.removeAsDefaultProtocolClient("bndlr");
 
   if (isDev && process.platform === "win32") {
-    console.log(path.resolve(process.execPath, process.argv[1]));
     app.setAsDefaultProtocolClient("bndlr", process.execPath, [
       path.resolve(process.argv[1]),
     ]);
