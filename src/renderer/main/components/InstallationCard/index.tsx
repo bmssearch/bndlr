@@ -65,7 +65,8 @@ export const InstallationCard: React.FC<Props> = ({
         alt=""
       />
       <p className={styles.type}>
-        {resourceTypeLabel[installation.resource.type]}・ogg修正
+        {resourceTypeLabel[installation.resource.type]}
+        {installation.resource.name && `・${installation.resource.name}`}
       </p>
       <p className={styles.bms} style={{ marginTop: 2 }}>
         {installation.resource.bms.title}

@@ -47,6 +47,7 @@ const migrator: Migrator = {
       CREATE TABLE resources (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         bmsId INTEGER NOT NULL,
+        name VARCHAR,
         url VARCHAR(4096) NOT NULL,
         type VARCHAR NOT NULL,
         updatedAt text,

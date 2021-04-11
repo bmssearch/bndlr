@@ -45,10 +45,11 @@ export class BetterSqliteResourceRepository implements ResourceRepository {
       const st = this.dbc
         .db()
         .prepare(
-          "UPDATE resources SET url = :url, type = :type, updatedAt = :updatedAt WHERE id = :id"
+          "UPDATE resources SET name = :name, url = :url, type = :type, updatedAt = :updatedAt WHERE id = :id"
         );
       st.run({
         id: existing.id,
+        name: resource.name || null,
         url: resource.url,
         type: resource.type,
         updatedAt: resource.updatedAt ? resource.updatedAt.toISOString() : null,
@@ -58,10 +59,11 @@ export class BetterSqliteResourceRepository implements ResourceRepository {
       const st = this.dbc
         .db()
         .prepare(
-          "INSERT INTO resources (bmsId, url, type, updatedAt) VALUES (:bmsId, :url, :type, :updatedAt)"
+          "INSERT INTO resources (bmsId, name, url, type, updatedAt) VALUES (:bmsId, :name, :url, :type, :updatedAt)"
         );
       const info = st.run({
         bmsId,
+        name: resource.name || null,
         url: resource.url,
         type: resource.type,
         updatedAt: resource.updatedAt ? resource.updatedAt.toISOString() : null,

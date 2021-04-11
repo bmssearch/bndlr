@@ -1,4 +1,4 @@
-import { Bms as BbsBms } from "@bmssearch/bms-bundle-spec";
+import { Bms as BbsBms } from "@bmssearch/bms-bundle-manifest";
 import { ResourceManifest } from "./ResourceManifest";
 import { urlDomain } from "../utils/url";
 
@@ -42,7 +42,7 @@ export class BmsManifest implements BmsManifestAttrs {
       manifestUrl,
       domain: urlDomain(manifestUrl),
       domainScopedId: spec.id,
-      title: "dummy title",
+      title: spec.title,
       websiteUrl: spec.website_url,
       groupManifestUrl: spec.group_url,
       updatesManifestUrl: spec.updates_url,

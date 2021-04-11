@@ -70,7 +70,7 @@
     "webpack": "^4.42.1"
   },
   "dependencies": {
-    "@bmssearch/bms-bundle-spec": "file:../bms-bundle-spec-js",
+    "@bmssearch/bms-bundle-manifest": "0.0.1",
     "auto-launch": "^5.0.5",
     "better-sqlite3": "^7.1.4",
     "clsx": "^1.1.1",

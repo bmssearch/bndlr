@@ -1,4 +1,4 @@
-import { Updates as BbsUpdates } from "@bmssearch/bms-bundle-spec";
+import { Updates as BbsUpdates } from "@bmssearch/bms-bundle-manifest";
 import { urlDomain } from "../utils/url";
 
 export interface UpdatesManifestAttrs {

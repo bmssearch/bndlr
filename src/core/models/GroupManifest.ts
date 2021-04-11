@@ -1,4 +1,4 @@
-import { Group as BbsGroup } from "@bmssearch/bms-bundle-spec";
+import { Group as BbsGroup } from "@bmssearch/bms-bundle-manifest";
 import { urlDomain } from "../utils/url";
 
 export interface GroupManifestAttrs {
