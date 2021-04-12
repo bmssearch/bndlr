@@ -8,7 +8,7 @@ export class TemporaryDiskProvider {
       throw "Directory already exists";
     }
 
-    fs.mkdirSync(path);
+    fs.mkdirSync(path, { recursive: true });
   }
 
   public destroy = (): Promise<void> => {

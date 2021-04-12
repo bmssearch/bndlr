@@ -15,20 +15,19 @@ export const mockBmsManifest: BmsManifest = {
   resources: [
     {
       name: "通常版",
-      url: "https://www.dropbox.com/s/magw392fp7n5v0w/Falling%20Cxte.zip?dl=1",
+      url: "https://www.dropbox.com/s/magw392fp7n5v0w/Falling%20Cxte.zip?dl=0",
       type: "core",
       updatedAt: new Date(),
     },
     {
-      name: "Drive版",
+      name: "rar版",
       url:
-        "https://drive.google.com/file/d/1BnrKVdL3d9aGwb8pUiT-efut9zxz73H-/view?usp=sharing",
+        "https://www.dropbox.com/s/02ex1ftmpkaif26/45_ryu0316_konosora_ogg.rar",
       type: "core",
     },
     {
-      name: "Drive版",
-      url:
-        "https://drive.google.com/file/d/1BnrKVdL3d9aGwb8pUiT-efut9zxz73H-/view?usp=sharing2",
+      name: "だばぁ版",
+      url: "https://www.dropbox.com/s/dinxpqj7s2b0m9o/clutter.zip?dl=0",
       type: "additional",
       updatedAt: new Date(),
     },

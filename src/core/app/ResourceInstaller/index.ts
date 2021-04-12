@@ -1,33 +1,12 @@
-import { DownloaderFactory } from "./Downloader";
-import { ExtractorFactory } from "./Extractor";
-import { TemporaryDiskProviderFactory } from "./TemporaryDiskProvider";
+import { ProgressHandler, ResourceInstallerProgress } from "./types";
+
+import { DestinationNotFoundError } from "./errors";
+import { DirectoryLocator } from "../../adapters/DirectoryLocator";
+import { DownloaderFactory } from "../../adapters/Downloader";
+import { ExtractorFactoryAbstract } from "../../adapters/Extractor";
+import { TemporaryDiskProviderFactory } from "../../adapters/TemporaryDiskProvider";
 import fse from "fs-extra";
-
-interface ConnectingProgress {
-  type: "connecting";
-}
-interface TransferringProgress {
-  type: "transferring";
-  transferedByte: number;
-  totalByte?: number;
-}
-interface ExtractingProgress {
-  type: "extracting";
-}
-interface CopyingProgress {
-  type: "copying";
-}
-interface CleaningProgress {
-  type: "cleaning";
-}
-export type ResourceInstallerProgress =
-  | ConnectingProgress
-  | TransferringProgress
-  | ExtractingProgress
-  | CopyingProgress
-  | CleaningProgress;
-
-type ProgressHandler = (progress: ResourceInstallerProgress) => void;
+import path from "path";
 
 export class ResourceInstaller {
   private progressListeners: ProgressHandler[] = [];
@@ -35,10 +14,17 @@ export class ResourceInstaller {
   constructor(
     private tdpFactory: TemporaryDiskProviderFactory,
     private downloaderFactory: DownloaderFactory,
-    private extractorFactory: ExtractorFactory
+    private extractorFactory: ExtractorFactoryAbstract,
+    private directoryLocator: DirectoryLocator
   ) {}
 
-  public install = async (url: string, dist: string): Promise<void> => {
+  public install = async (url: string, destRoot: string): Promise<void> => {
+    if (!(await fse.pathExists(destRoot))) {
+      throw new DestinationNotFoundError(
+        `インストール先「${destRoot}」は存在しません。正しいインストール先を指定してください。`
+      );
+    }
+
     const tdp = this.tdpFactory.create();
 
     const downloader = this.downloaderFactory.create();
@@ -59,10 +45,12 @@ export class ResourceInstaller {
 
     const extractor = this.extractorFactory.create();
     this.emitProgress({ type: "extracting" });
-    const extracted = await extractor.extract(downloaded.filePath, tdp.path);
+
+    const extractPath = path.join(tdp.path, "extracted");
+    await extractor.extract(downloaded.filePath, extractPath);
 
     this.emitProgress({ type: "copying" });
-    await fse.copy(extracted.dirPath, dist, { overwrite: true });
+    await this.directoryLocator.copy(extractPath, path.join(destRoot, "temp"));
 
     this.emitProgress({ type: "cleaning" });
     await tdp.destroy();
@@ -81,13 +69,15 @@ export class ResourceInstallerFactory {
   constructor(
     private tdpFactory: TemporaryDiskProviderFactory,
     private downloaderFactory: DownloaderFactory,
-    private extractorFactory: ExtractorFactory
+    private extractorFactory: ExtractorFactoryAbstract,
+    private directoryLocator: DirectoryLocator
   ) {}
 
   public create = () =>
     new ResourceInstaller(
       this.tdpFactory,
       this.downloaderFactory,
-      this.extractorFactory
+      this.extractorFactory,
+      this.directoryLocator
     );
 }

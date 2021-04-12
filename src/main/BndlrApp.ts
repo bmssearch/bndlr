@@ -1,3 +1,5 @@
+import { app, dialog } from "electron";
+
 import { AppEventEmitter } from "./AppEventRouter/types";
 import { AppEventRouter } from "./AppEventRouter";
 import { AppTray } from "./windows/tray";
@@ -9,7 +11,6 @@ import { InstallationWorker } from "../core/workers/InstallationWorker";
 import { MainWindow } from "./windows/MainWindow";
 import { ObservationWorker } from "../core/workers/ObservationWorker";
 import { PreferencesRepository } from "../core/repositories/PreferencesRepository";
-import { app } from "electron";
 import { setAutoLaunch } from "./settings";
 //@ts-ignore
 import trayWindow from "electron-tray-window";
@@ -53,8 +54,13 @@ export class BndlrApp {
     this.installationWorker.addFinishListener((installationId) => {
       this.appEventEmitter.emit("finishInstallation", { installationId });
     });
-    this.installationWorker.addErrorListener((installationId) => {
+    this.installationWorker.addFailListener((installationId) => {
       this.appEventEmitter.emit("failInstallation", { installationId });
+    });
+    this.installationWorker.addFatalListener((message) => {
+      if (this.mainWindow.win) {
+        dialog.showMessageBox(this.mainWindow.win, { message });
+      }
     });
     this.installationWorker.start();
 

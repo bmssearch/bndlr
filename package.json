@@ -79,6 +79,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^7.0.3",
     "electron-tray-window": "^1.2.5",
+    "extensible-custom-error": "0.0.7",
     "follow-redirects": "^1.13.3",
     "formik": "^2.2.6",
     "fs-extra": "^8.1.0",

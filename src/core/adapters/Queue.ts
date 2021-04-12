@@ -9,7 +9,8 @@ export interface QueueItem<T, P> {
 type Handler<T, P> = (
   entity: T,
   onProgress: (progress: P) => void,
-  onFinish: () => void
+  onFinish: () => void,
+  onFatal: () => void
 ) => void;
 
 type ChangeListener<T, M> = (
@@ -98,6 +99,11 @@ export class EventEmitterQueue<T, M> implements Queue<T, M> {
           },
           () => {
             this.items.delete(item);
+            this.onChange();
+            this.eventEmitter.emit("finish");
+          },
+          () => {
+            this.items.clear();
             this.onChange();
             this.eventEmitter.emit("finish");
           }

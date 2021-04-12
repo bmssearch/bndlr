@@ -2,7 +2,7 @@ import { EventEmitter } from "events";
 import { Installation } from "../../core/models/Installation";
 import { Preferences } from "../../core/models/Preference";
 import { QueueItem } from "../../core/adapters/Queue";
-import { ResourceInstallerProgress } from "../../core/adapters/ResourceInstaller";
+import { ResourceInstallerProgress } from "../../core/app/ResourceInstaller/types";
 
 export interface AppEventList {
   test: Record<string, never>;
