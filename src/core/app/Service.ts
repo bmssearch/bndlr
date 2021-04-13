@@ -67,8 +67,11 @@ export class Service {
   };
 
   public putInstallationIntoTaskQueue = async (installation: Installation) => {
-    // InstallationProgressを生成
     this.installationWorker.put(installation);
+  };
+
+  public skipInstallation = async (installation: Installation) => {
+    this.installationRepoisotry.updateStatus(installation.id, "skipped");
   };
 
   public fetchPreferences = async () => {
@@ -200,6 +203,11 @@ export class Service {
 
     const updatedBmsManifestUrlsList = await Promise.all(
       observations.map(async (observation) => {
+        await this.observationRepository.markChecked(
+          observation.manifestUrl,
+          new Date()
+        );
+
         let updates: UpdatesManifest;
         try {
           updates = await this.updatesManifestRepository.fetch(
@@ -227,11 +235,6 @@ export class Service {
           }
           return null;
         }
-
-        await this.observationRepository.check(
-          observation.manifestUrl,
-          new Date()
-        );
 
         const manifestUrls = await Promise.all(
           (updates.bmses || []).map(async (updatedBms) => {

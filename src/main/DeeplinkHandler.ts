@@ -12,7 +12,16 @@ export class DeeplinkHandler {
 
     router.add("manifest/bms?url=:url(.*)", (params) => {
       if (!params.url) return;
-      this.appEventEmitter.emit("addBms", { manifestUrl: params.url });
+      this.appEventEmitter.emit("importBmsManifest", {
+        manifestUrl: params.url,
+      });
+    });
+
+    router.add("manifest/group?url=:url(.*)", (params) => {
+      if (!params.url) return;
+      this.appEventEmitter.emit("importGroupManifest", {
+        manifestUrl: params.url,
+      });
     });
 
     const res = router.find(path);

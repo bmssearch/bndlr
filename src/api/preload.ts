@@ -50,6 +50,10 @@ export class ContextBridgeApi {
     send("acceptProposedInstallations", { installations });
   };
 
+  public skipProposedInstallations = (installations: Installation[]): void => {
+    send("skipProposedInstallations", { installations });
+  };
+
   public listenToInstallations: Listener<"installationsLoaded"> = (handler) =>
     listen("installationsLoaded", handler);
 

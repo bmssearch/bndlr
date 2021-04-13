@@ -17,7 +17,7 @@ export class BetterSqliteObservationRepository
     return observations;
   };
 
-  public check = async (manifestUrl: string, checkedAt: Date) => {
+  public markChecked = async (manifestUrl: string, checkedAt: Date) => {
     const st = this.dbc
       .db()
       .prepare("UPDATE observations SET checkedAt = ? WHERE manifestUrl = ?");

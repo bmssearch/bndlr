@@ -77,7 +77,7 @@ export const InstallationCard: React.FC<Props> = ({
       <p className={styles.updated_at}>
         {DateTime.fromJSDate(installation.createdAt).toRelative()}
       </p>
-      {installation.status === "proposed" && (
+      {installation.status === "proposed" && !progress && (
         <div className={clsx(styles.actions, styles.buttons)}>
           <Button
             label="Skip"

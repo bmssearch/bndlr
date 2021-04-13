@@ -31,8 +31,6 @@ export class ResourceInstaller {
 
     const tdp = this.tdpFactory.create();
 
-    console.log("I AM HERE");
-
     const downloader = this.downloaderFactory.create();
     downloader.onProgress((progress) => {
       switch (progress.type) {

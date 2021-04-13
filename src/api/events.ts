@@ -19,6 +19,8 @@ export interface BridgeEventList {
 
   fetchInstallations: Record<string, never>;
   acceptProposedInstallations: { installations: Installation[] };
+  skipProposedInstallations: { installations: Installation[] };
+
   installationsLoaded: {
     installations: Installation[];
   };

@@ -123,6 +123,14 @@ export class AppHandler {
         this.service.putInstallationIntoTaskQueue(installation);
       });
     });
+    this.emitter.on("skipInstallations", async ({ installations }) => {
+      await Promise.all(
+        installations.map(async (installation) => {
+          await this.service.skipInstallation(installation);
+        })
+      );
+      this.emitter.emit("reloadInstallations", {});
+    });
 
     this.emitter.on("reloadPreferences", async () => {
       const preferences = await this.service.fetchPreferences();

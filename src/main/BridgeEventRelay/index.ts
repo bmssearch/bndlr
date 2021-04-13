@@ -1,22 +1,26 @@
-import { IpcMainEventEmitter, RelayEventEmitter } from "./types";
 import { Menu, dialog } from "electron";
 
 import { AppEventEmitter } from "../AppHandler/types";
 import { BridgeEventList } from "../../api/events";
+import { IpcMainEventEmitter } from "./types";
+import { MainWindow } from "../windows/MainWindow";
+import { PreferencesWindow } from "../windows/PreferencesWindow";
 
 export class BridgeEventRelay {
-  private relayEventEmitter: RelayEventEmitter;
   private ipcMainEmitter: IpcMainEventEmitter;
 
-  constructor(private appEventEmitter: AppEventEmitter) {
-    this.relayEventEmitter = new RelayEventEmitter();
+  constructor(
+    private appEventEmitter: AppEventEmitter,
+    private mainWindow: MainWindow,
+    private preferencesWindow: PreferencesWindow
+  ) {
     this.ipcMainEmitter = new IpcMainEventEmitter();
   }
 
   public listen = () => {
     this.ipcMainEmitter.on("test", () => {
       this.appEventEmitter.emit("test", {});
-      console.log("テストだよ");
+      console.log("TESTING");
     });
 
     this.ipcMainEmitter.handle("selectDirectory", async () => {
@@ -80,28 +84,28 @@ export class BridgeEventRelay {
     this.ipcMainEmitter.on("fetchInstallations", () => {
       this.appEventEmitter.emit("reloadInstallations", {});
     });
+
     this.ipcMainEmitter.on(
       "acceptProposedInstallations",
       async (event, { installations }) => {
         this.appEventEmitter.emit("execInstallations", { installations });
+        this.mainWindow.show();
+      }
+    );
+
+    this.ipcMainEmitter.on(
+      "skipProposedInstallations",
+      async (event, { installations }) => {
+        this.appEventEmitter.emit("skipInstallations", { installations });
       }
     );
   };
 
-  public onEvent = <K extends keyof BridgeEventList>(
-    handler: (channel: K, params: BridgeEventList[K]) => void
-  ) => {
-    this.relayEventEmitter.on("event", handler);
-  };
-  public removeListener = <K extends keyof BridgeEventList>(
-    handler: (channel: K, params: BridgeEventList[K]) => void
-  ) => {
-    this.relayEventEmitter.removeListener("event", handler);
-  };
   public deliver = <K extends keyof BridgeEventList>(
     channel: K,
     params: BridgeEventList[K]
   ) => {
-    this.relayEventEmitter.emit("event", channel, params);
+    this.mainWindow.send(channel, params);
+    this.preferencesWindow.send(channel, params);
   };
 }

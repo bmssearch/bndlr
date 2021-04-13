@@ -144,13 +144,17 @@ const service = new Service(
   resourceRegistrar
 );
 
+const appTray = new AppTray();
+const mainWindow = new MainWindow();
+const preferencesWindow = new PreferencesWindow();
+
 const appEventEmitter = new AppEventEmitter();
 const deeplinkHandler = new DeeplinkHandler(appEventEmitter);
-const relay = new BridgeEventRelay(appEventEmitter);
-
-const appTray = new AppTray();
-const mainWindow = new MainWindow(relay);
-const preferencesWindow = new PreferencesWindow(relay);
+const relay = new BridgeEventRelay(
+  appEventEmitter,
+  mainWindow,
+  preferencesWindow
+);
 
 const notificator = new Notificator(mainWindow);
 

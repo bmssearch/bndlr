@@ -11,7 +11,7 @@ export class SequelizeObservationRepository implements ObservationRepository {
     return observations.map((v) => v.toObservation());
   };
 
-  public check = async (manifestUrl: string, checkedAt: Date) => {
+  public markChecked = async (manifestUrl: string, checkedAt: Date) => {
     await DBObservation.update({ checkedAt }, { where: { manifestUrl } });
   };
 

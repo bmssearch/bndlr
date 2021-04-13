@@ -10,7 +10,6 @@ export interface AppEventList {
   importBmsManifest: { manifestUrl: string; notifyEmptyResult?: boolean };
   importGroupManifest: { manifestUrl: string };
   checkUpdates: Record<string, never>;
-  execInstallations: { installations: Installation[] };
 
   reloadPreferences: Record<string, never>;
   setPreferences: { preferences: Preferences };
@@ -18,6 +17,8 @@ export interface AppEventList {
   closePreferencesWindow: Record<string, never>;
 
   reloadInstallations: Record<string, never>;
+  execInstallations: { installations: Installation[] };
+  skipInstallations: { installations: Installation[] };
 
   progressOnInstallations: {
     items: QueueItem<Installation, ResourceInstallerProgress>[];
