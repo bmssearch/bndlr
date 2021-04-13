@@ -1,13 +1,7 @@
-import {
-  mockBmsManifest,
-  mockGroupManifest,
-  mockUpdatesManifest,
-} from "../__mock__/mocks";
-
 import { AntiClutterDirectoryLocator } from "../core/adapters/DirectoryLocator/AntiClutterDirectoryLocator";
-import { AppEventEmitter } from "./AppEventRouter/types";
-import { AppEventRouter } from "./AppEventRouter";
-import { AppTray } from "./windows/tray";
+import { AppEventEmitter } from "./AppHandler/types";
+import { AppHandler } from "./AppHandler";
+import { AppTray } from "./windows/AppTray";
 import AutoLaunch from "auto-launch";
 import { BetterSqlBmsRepository } from "../core/repositories/BetterSqliteImpl/BmsRepository";
 import { BetterSqliteBmsCheckRepository } from "../core/repositories/BetterSqliteImpl/BmsCheckRepository";
@@ -16,7 +10,7 @@ import { BetterSqliteInstallationRepository } from "../core/repositories/BetterS
 import { BetterSqliteObservationRepository } from "../core/repositories/BetterSqliteImpl/ObservationRepository";
 import { BetterSqliteResourceRepository } from "../core/repositories/BetterSqliteImpl/ResourceRepository";
 import { BmsRegistrar } from "../core/app/BmsRegistrar";
-import { BndlrApp } from "./BndlrApp";
+import { BndlrApp } from "./app";
 import { BridgeEventRelay } from "./BridgeEventRelay";
 import { DatabaseConnector } from "../core/adapters/bettersqlite";
 import { DeeplinkHandler } from "./DeeplinkHandler";
@@ -26,11 +20,13 @@ import { EventEmitterQueue } from "../core/adapters/Queue";
 import { ExtractorFactoryAbstract } from "../core/adapters/Extractor";
 import { GroupRegistrar } from "../core/app/GroupRegistrar";
 import { Installation } from "../core/models/Installation";
+import { InstallationFolderNamer } from "../core/app/InstallationFolderNamer";
 import { InstallationWorker } from "../core/workers/InstallationWorker";
 import { MainWindow } from "./windows/MainWindow";
-import { MockBmsManifestRepository } from "../core/repositories/BmsManifestRepository";
-import { MockGroupManifestRepository } from "../core/repositories/GroupManifestRepository";
-import { MockUpdatesManifestRepository } from "../core/repositories/UpdatesManifestRepository";
+import { NetworkBmsManifestRepository } from "../core/repositories/BmsManifestRepository";
+import { NetworkGroupManifestRepository } from "../core/repositories/GroupManifestRepository";
+import { NetworkUpdatesManifestRepository } from "../core/repositories/UpdatesManifestRepository";
+import { Notificator } from "./Notificator";
 import { ObservationRegistrar } from "../core/app/ObservationRegistrar";
 import { ObservationWorker } from "../core/workers/ObservationWorker";
 import { PreferencesWindow } from "./windows/PreferencesWindow";
@@ -50,13 +46,9 @@ const dbc = new DatabaseConnector();
 const autoLaunch = new AutoLaunch({ name: "bndlr" });
 const preferencesRepository = new StorePreferencesRepository();
 
-const bmsManifestRepository = new MockBmsManifestRepository(mockBmsManifest);
-const groupManifestRepository = new MockGroupManifestRepository(
-  mockGroupManifest
-);
-const updatesManifestRepository = new MockUpdatesManifestRepository(
-  mockUpdatesManifest
-);
+const bmsManifestRepository = new NetworkBmsManifestRepository();
+const groupManifestRepository = new NetworkGroupManifestRepository();
+const updatesManifestRepository = new NetworkUpdatesManifestRepository();
 
 const bmsRepository = new BetterSqlBmsRepository(dbc);
 const bmsCheckRepository = new BetterSqliteBmsCheckRepository(dbc);
@@ -110,6 +102,8 @@ const resourceInstallerFactory = new ResourceInstallerFactory(
   antiClutterDirectoryLocator
 );
 
+const installationFolderNamer = new InstallationFolderNamer();
+
 const installationQueue = new EventEmitterQueue<
   Installation,
   ResourceInstallerProgress
@@ -118,7 +112,8 @@ const installationQueue = new EventEmitterQueue<
 const installationWorker = new InstallationWorker(
   preferencesRepository,
   installationQueue,
-  resourceInstallerFactory
+  resourceInstallerFactory,
+  installationFolderNamer
 );
 
 const observationWorker = new ObservationWorker(
@@ -157,11 +152,14 @@ const appTray = new AppTray();
 const mainWindow = new MainWindow(relay);
 const preferencesWindow = new PreferencesWindow(relay);
 
-const router = new AppEventRouter(
+const notificator = new Notificator(mainWindow);
+
+const handler = new AppHandler(
   appEventEmitter,
   service,
   relay,
-  preferencesWindow
+  preferencesWindow,
+  notificator
 );
 
 export const bndlrApp = new BndlrApp(
@@ -171,11 +169,13 @@ export const bndlrApp = new BndlrApp(
 
   relay,
   appEventEmitter,
-  router,
+  handler,
   deeplinkHandler,
+  notificator,
 
   installationWorker,
   observationWorker,
+  service,
 
   mainWindow,
   appTray

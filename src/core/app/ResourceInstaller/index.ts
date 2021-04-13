@@ -18,7 +18,11 @@ export class ResourceInstaller {
     private directoryLocator: DirectoryLocator
   ) {}
 
-  public install = async (url: string, destRoot: string): Promise<void> => {
+  public install = async (
+    url: string,
+    destRoot: string,
+    folderName: string
+  ): Promise<void> => {
     if (!(await fse.pathExists(destRoot))) {
       throw new DestinationNotFoundError(
         `インストール先「${destRoot}」は存在しません。正しいインストール先を指定してください。`
@@ -26,6 +30,8 @@ export class ResourceInstaller {
     }
 
     const tdp = this.tdpFactory.create();
+
+    console.log("I AM HERE");
 
     const downloader = this.downloaderFactory.create();
     downloader.onProgress((progress) => {
@@ -50,7 +56,10 @@ export class ResourceInstaller {
     await extractor.extract(downloaded.filePath, extractPath);
 
     this.emitProgress({ type: "copying" });
-    await this.directoryLocator.copy(extractPath, path.join(destRoot, "temp"));
+    await this.directoryLocator.copy(
+      extractPath,
+      path.join(destRoot, folderName)
+    );
 
     this.emitProgress({ type: "cleaning" });
     await tdp.destroy();

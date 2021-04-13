@@ -1,7 +1,7 @@
 import { IpcMainEventEmitter, RelayEventEmitter } from "./types";
 import { Menu, dialog } from "electron";
 
-import { AppEventEmitter } from "../AppEventRouter/types";
+import { AppEventEmitter } from "../AppHandler/types";
 import { BridgeEventList } from "../../api/events";
 
 export class BridgeEventRelay {
@@ -64,13 +64,16 @@ export class BridgeEventRelay {
     });
 
     this.ipcMainEmitter.on("requestAddBms", async (event, { manifestUrl }) => {
-      this.appEventEmitter.emit("addBms", { manifestUrl });
+      this.appEventEmitter.emit("importBmsManifest", {
+        manifestUrl,
+        notifyEmptyResult: true,
+      });
     });
 
     this.ipcMainEmitter.on(
       "requestAddGroup",
       async (event, { manifestUrl }) => {
-        this.appEventEmitter.emit("addGroup", { manifestUrl });
+        this.appEventEmitter.emit("importGroupManifest", { manifestUrl });
       }
     );
 

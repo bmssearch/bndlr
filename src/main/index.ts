@@ -1,4 +1,5 @@
-import { app } from "electron";
+import { app, dialog } from "electron";
+
 import { bndlrApp } from "./di";
 import log from "electron-log";
 import { setDefaultProtocol } from "./settings";
@@ -9,6 +10,10 @@ if (require("electron-squirrel-startup")) {
 
 process.on("uncaughtException", (err) => {
   log.error(err);
+  dialog.showErrorBox(
+    "そんなことある？という感じのエラーが発生しました",
+    "報告いただけると嬉しいです。"
+  );
   app.quit();
 });
 

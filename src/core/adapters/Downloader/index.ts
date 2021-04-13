@@ -34,44 +34,49 @@ export class Downloader {
 
       this.progressListeners.forEach((h) => h({ type: "connecting" }));
 
-      const request = (url: string) =>
-        https.get(url, (res) => {
-          const rawContentLength = res.headers["content-length"];
-          const contentLength = rawContentLength
-            ? Number(rawContentLength)
-            : undefined;
-          let transferedByte = 0;
+      const request = https.get(url, (res) => {
+        const rawContentLength = res.headers["content-length"];
+        const contentLength = rawContentLength
+          ? Number(rawContentLength)
+          : undefined;
+        let transferedByte = 0;
 
-          if (contentLength && this.maxSizeByte < contentLength) {
+        if (contentLength && this.maxSizeByte < contentLength) {
+          outfileStream.destroy();
+          reject(new ExceedsMaximumSizeError("Request exceeds max size"));
+        }
+
+        res.pipe(outfileStream);
+
+        res.on("data", (chunk) => {
+          transferedByte += chunk.length;
+          this.progressListeners.forEach((h) =>
+            h({ type: "transfer", transferedByte, totalByte: contentLength })
+          );
+
+          if (this.maxSizeByte < transferedByte) {
             outfileStream.destroy();
             reject(new ExceedsMaximumSizeError("Request exceeds max size"));
           }
-
-          res.pipe(outfileStream);
-
-          res.on("data", (chunk) => {
-            transferedByte += chunk.length;
-            this.progressListeners.forEach((h) =>
-              h({ type: "transfer", transferedByte, totalByte: contentLength })
-            );
-
-            if (this.maxSizeByte < transferedByte) {
-              outfileStream.destroy();
-              reject(new ExceedsMaximumSizeError("Request exceeds max size"));
-            }
-          });
-
-          res.on("error", (err) => {
-            outfileStream.destroy();
-            reject(err);
-          });
-
-          res.on("end", () => {
-            outfileStream.close();
-            resolve({ filePath: outPath });
-          });
         });
-      request(url);
+
+        res.on("error", (err) => {
+          outfileStream.destroy();
+          reject(err);
+        });
+
+        res.on("end", () => {
+          outfileStream.close();
+          resolve({ filePath: outPath });
+        });
+      });
+
+      request.on("error", (err) => {
+        outfileStream.destroy();
+        reject(err);
+      });
+
+      request.end();
     });
   };
 

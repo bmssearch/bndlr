@@ -28,7 +28,7 @@ export class ResourceRegistrar {
     );
 
     if (isUpToDate(resourceManifest.updatedAt, latestInstallation?.createdAt)) {
-      return;
+      return null;
     }
 
     if (latestInstallation?.status === "proposed") {
@@ -46,7 +46,6 @@ export class ResourceRegistrar {
     )
       ? "skipped"
       : "proposed";
-    await this.installationRepository.create(resource.id, status);
-    return;
+    return await this.installationRepository.create(resource.id, status);
   };
 }

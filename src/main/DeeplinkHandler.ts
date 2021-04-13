@@ -1,4 +1,4 @@
-import { AppEventEmitter } from "./AppEventRouter/types";
+import { AppEventEmitter } from "./AppHandler/types";
 import Router from "url-router";
 
 export class DeeplinkHandler {

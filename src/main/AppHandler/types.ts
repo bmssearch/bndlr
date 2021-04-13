@@ -7,8 +7,8 @@ import { ResourceInstallerProgress } from "../../core/app/ResourceInstaller/type
 export interface AppEventList {
   test: Record<string, never>;
 
-  addBms: { manifestUrl: string };
-  addGroup: { manifestUrl: string };
+  importBmsManifest: { manifestUrl: string; notifyEmptyResult?: boolean };
+  importGroupManifest: { manifestUrl: string };
   checkUpdates: Record<string, never>;
   execInstallations: { installations: Installation[] };
 

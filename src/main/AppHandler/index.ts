@@ -1,34 +1,121 @@
+import { ManifestInvalidError, RequestError } from "../../core/models/errors";
+import { app, dialog } from "electron";
+
 import { AppEventEmitter } from "./types";
 import { BridgeEventRelay } from "../BridgeEventRelay";
 import { InstallationProgress } from "../../core/models/InstallationProgress";
+import { Notificator } from "../Notificator";
 import { PreferencesWindow } from "../windows/PreferencesWindow";
 import { Service } from "../../core/app/Service";
-import { app } from "electron";
+import log from "electron-log";
 import { throttle } from "throttle-debounce";
 
-export class AppEventRouter {
+export class AppHandler {
   constructor(
     private emitter: AppEventEmitter,
     private service: Service,
     private relay: BridgeEventRelay,
-    private preferencesWindow: PreferencesWindow
+    private preferencesWindow: PreferencesWindow,
+    private notificator: Notificator
   ) {}
 
   public listen = () => {
     this.emitter.removeAllListeners();
 
-    this.emitter.on("addBms", async ({ manifestUrl }) => {
-      await this.service.addBms(manifestUrl);
-      this.emitter.emit("reloadInstallations", {});
-    });
+    this.emitter.on(
+      "importBmsManifest",
+      async ({ manifestUrl, notifyEmptyResult }) => {
+        try {
+          const createdInstallations = await this.service.importBmsManifest(
+            manifestUrl
+          );
 
-    this.emitter.on("addGroup", async ({ manifestUrl }) => {
-      await this.service.addGroup(manifestUrl);
-      this.emitter.emit("reloadInstallations", {});
+          if (createdInstallations.length === 0 && notifyEmptyResult) {
+            this.notificator.show(
+              "BMSマニフェストを読み込みました",
+              "新しいインストール準備はありません。"
+            );
+          }
+          if (createdInstallations.length > 0) {
+            this.notificator.show(
+              "BMSマニフェストを読み込みました",
+              `${createdInstallations.length}件のインストール準備ができました。`
+            );
+          }
+
+          this.emitter.emit("reloadInstallations", {});
+        } catch (err) {
+          if (err instanceof RequestError) {
+            this.notificator.show(
+              "マニフェストを取得できませんでした",
+              err.message
+            );
+          } else if (err instanceof ManifestInvalidError) {
+            this.notificator.show(
+              "マニフェストの形式が正しくありません",
+              err.message
+            );
+          } else {
+            log.error(err);
+            dialog.showErrorBox(
+              "何このエラー",
+              "こんなエラー起こるはずではなかった、、開発者に教えていただけると嬉しいです。\n\n" +
+                err.message
+            );
+          }
+        }
+      }
+    );
+
+    this.emitter.on("importGroupManifest", async ({ manifestUrl }) => {
+      try {
+        const bmsManifestUrls = await this.service.importGroupManifest(
+          manifestUrl
+        );
+        this.notificator.show("グループマニフェストを読み込みました");
+        bmsManifestUrls.forEach((bmsManifestUrl) => {
+          this.emitter.emit("importBmsManifest", {
+            manifestUrl: bmsManifestUrl,
+          });
+        });
+      } catch (err) {
+        if (err instanceof RequestError) {
+          this.notificator.show(
+            "マニフェストを取得できませんでした",
+            err.message
+          );
+        } else if (err instanceof ManifestInvalidError) {
+          this.notificator.show(
+            "マニフェストの形式が正しくありません",
+            err.message
+          );
+        } else {
+          log.error(err);
+          dialog.showErrorBox(
+            "何このエラー",
+            "こんなエラー起こるはずではなかった、、開発者に教えていただけると嬉しいです。\n\n" +
+              err.message
+          );
+        }
+      }
     });
 
     this.emitter.on("checkUpdates", async () => {
-      await this.service.checkUpdates();
+      try {
+        const bmsManifestUrls = await this.service.checkUpdates();
+        bmsManifestUrls.forEach((bmsManifestUrl) => {
+          this.emitter.emit("importBmsManifest", {
+            manifestUrl: bmsManifestUrl,
+          });
+        });
+      } catch (err) {
+        log.error(err);
+        dialog.showErrorBox(
+          "何このエラー",
+          "こんなエラー起こるはずではなかった、、開発者に教えていただけると嬉しいです。\n\n" +
+            err.message
+        );
+      }
     });
 
     this.emitter.on("execInstallations", ({ installations }) => {
@@ -60,7 +147,7 @@ export class AppEventRouter {
 
     this.emitter.on(
       "progressOnInstallations",
-      throttle(80, async ({ items }) => {
+      throttle(80, ({ items }) => {
         const installationProgresses = items.map((item) => {
           const installationId = item.entity.id;
           if (item.status === "queued") {

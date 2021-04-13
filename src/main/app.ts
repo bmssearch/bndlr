@@ -1,16 +1,18 @@
 import { app, dialog } from "electron";
 
-import { AppEventEmitter } from "./AppEventRouter/types";
-import { AppEventRouter } from "./AppEventRouter";
-import { AppTray } from "./windows/tray";
+import { AppEventEmitter } from "./AppHandler/types";
+import { AppHandler } from "./AppHandler";
+import { AppTray } from "./windows/AppTray";
 import AutoLaunch from "auto-launch";
 import { BridgeEventRelay } from "./BridgeEventRelay";
 import { DatabaseConnector } from "../core/adapters/bettersqlite";
 import { DeeplinkHandler } from "./DeeplinkHandler";
 import { InstallationWorker } from "../core/workers/InstallationWorker";
 import { MainWindow } from "./windows/MainWindow";
+import { Notificator } from "./Notificator";
 import { ObservationWorker } from "../core/workers/ObservationWorker";
 import { PreferencesRepository } from "../core/repositories/PreferencesRepository";
+import { Service } from "../core/app/Service";
 import { setAutoLaunch } from "./settings";
 //@ts-ignore
 import trayWindow from "electron-tray-window";
@@ -25,12 +27,14 @@ export class BndlrApp {
     // handlers
     private relay: BridgeEventRelay,
     private appEventEmitter: AppEventEmitter,
-    private router: AppEventRouter,
+    private handler: AppHandler,
     private deeplinkHandler: DeeplinkHandler,
+    private notificator: Notificator,
 
     // core
     private installationWorker: InstallationWorker,
     private observationWorker: ObservationWorker,
+    private service: Service,
 
     // windows
     private mainWindow: MainWindow,
@@ -45,19 +49,35 @@ export class BndlrApp {
     const { launchOnStartup } = await this.preferencesRepository.get();
     setAutoLaunch(this.autoLaunch, launchOnStartup);
 
+    this.service.addErrorLister((title, err) => {
+      this.notificator.show(title, err.message);
+    });
+
     this.relay.listen();
-    this.router.listen();
+    this.handler.listen();
 
     this.installationWorker.addChangeListener((items) => {
       this.appEventEmitter.emit("progressOnInstallations", { items });
     });
-    this.installationWorker.addFinishListener((installationId) => {
-      this.appEventEmitter.emit("finishInstallation", { installationId });
+    this.installationWorker.addFinishListener((installation) => {
+      this.notificator.show(
+        "インストールが完了しました",
+        `${installation.resource.bms.title} - ${installation.resource.name}`
+      );
+      this.appEventEmitter.emit("finishInstallation", {
+        installationId: installation.id,
+      });
     });
-    this.installationWorker.addFailListener((installationId) => {
-      this.appEventEmitter.emit("failInstallation", { installationId });
+    this.installationWorker.addFailListener((installation, message) => {
+      this.notificator.show(
+        "インストールが失敗しました",
+        `${installation.resource.bms.title} - ${installation.resource.name}\n\n${message}`
+      );
+      this.appEventEmitter.emit("failInstallation", {
+        installationId: installation.id,
+      });
     });
-    this.installationWorker.addFatalListener((message) => {
+    this.installationWorker.addFatalListener((installation, message) => {
       if (this.mainWindow.win) {
         dialog.showMessageBox(this.mainWindow.win, { message });
       }

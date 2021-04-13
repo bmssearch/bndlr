@@ -3,6 +3,7 @@ import { Queue, QueueItem } from "../adapters/Queue";
 import { DestinationNotFoundError } from "../app/ResourceInstaller/errors";
 import { ExceedsMaximumSizeError } from "../adapters/Downloader/errors";
 import { Installation } from "../models/Installation";
+import { InstallationFolderNamer } from "../app/InstallationFolderNamer";
 import { PreferencesRepository } from "../repositories/PreferencesRepository";
 import { ResourceInstallerFactory } from "../app/ResourceInstaller";
 import { ResourceInstallerProgress } from "../app/ResourceInstaller/types";
@@ -12,23 +13,24 @@ type Handler = (
   items: QueueItem<Installation, ResourceInstallerProgress>[]
 ) => void;
 
-type FinishHandler = (installationId: number) => void;
-type FailHandler = (InstallationId: number) => void;
-type FatalHandler = (message: string) => void;
+type FinishHandler = (installation: Installation) => void;
+type FailHandler = (installation: Installation, message: string) => void;
+type FatalHandler = (installation: Installation, message: string) => void;
 
 export class InstallationWorker {
   private finishListeners: FinishHandler[] = [];
-  private failListeners: FinishHandler[] = [];
+  private failListeners: FailHandler[] = [];
   private fatalListeners: FatalHandler[] = [];
 
   constructor(
     private preferenceRepository: PreferencesRepository,
     private queue: Queue<Installation, ResourceInstallerProgress>,
-    private resourceInstallerFactory: ResourceInstallerFactory
+    private resourceInstallerFactory: ResourceInstallerFactory,
+    private installationFolderNamer: InstallationFolderNamer
   ) {}
 
   public start = () => {
-    this.queue.init(async (entity, onProgress, onFinish, onFatal) => {
+    this.queue.init(async (installation, onProgress, onFinish, onFatal) => {
       try {
         const resourceInstaller = this.resourceInstallerFactory.create();
         resourceInstaller.onProgress((progress) => {
@@ -36,21 +38,25 @@ export class InstallationWorker {
         });
 
         const { installationDist } = await this.preferenceRepository.get();
-        await resourceInstaller.install(entity.resource.url, installationDist);
+        await resourceInstaller.install(
+          installation.resource.url,
+          installationDist,
+          this.installationFolderNamer.name(installation.resource.bms)
+        );
 
-        this.handleFinish(entity.id);
+        this.handleFinish(installation);
         onFinish();
       } catch (err) {
         log.error(err);
 
         if (err instanceof DestinationNotFoundError) {
-          this.handleFatal(err.message);
+          this.handleFatal(installation, err.message);
           onFatal();
         } else if (err instanceof ExceedsMaximumSizeError) {
-          this.handleFail(entity.id);
+          this.handleFail(installation, "ファイルサイズが大きすぎます。");
           onFinish();
         } else {
-          this.handleFail(entity.id);
+          this.handleFail(installation, err.message);
           onFinish();
         }
       }
@@ -80,21 +86,21 @@ export class InstallationWorker {
     });
   };
 
-  private handleFinish = (id: number) => {
+  private handleFinish = (installation: Installation) => {
     this.finishListeners.forEach((listener) => {
-      listener(id);
+      listener(installation);
     });
   };
 
-  private handleFail = (id: number) => {
+  private handleFail = (installation: Installation, message: string) => {
     this.failListeners.forEach((listener) => {
-      listener(id);
+      listener(installation, message);
     });
   };
 
-  private handleFatal = (message: string) => {
+  private handleFatal = (installation: Installation, message: string) => {
     this.fatalListeners.forEach((listener) => {
-      listener(message);
+      listener(installation, message);
     });
   };
 }

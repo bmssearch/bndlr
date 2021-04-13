@@ -7,7 +7,6 @@ export class AntiClutterDirectoryLocator implements DirectoryLocator {
     const dirs = await fse.readdir(src, { withFileTypes: true });
 
     if (dirs.length === 1 && dirs[0].isDirectory()) {
-      console.log(path.join(src, dirs[0].name));
       await this.copy(path.join(src, dirs[0].name), dest);
       return;
     }

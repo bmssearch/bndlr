@@ -3,6 +3,7 @@ import {
   IdentityFactory,
 } from "../models/Identity";
 import { Installation, InstallationStatus } from "../models/Installation";
+import { ManifestInvalidError, RequestError } from "../models/errors";
 
 import AutoLaunch from "auto-launch";
 import { BmsCheckRepository } from "../repositories/BmsCheckRepository";
@@ -21,10 +22,24 @@ import { PreferencesRepository } from "../repositories/PreferencesRepository";
 import { ResourceRegistrar } from "./ResourceRegistrar";
 import { ResourceRepository } from "../repositories/ResourceRepository";
 import { ResourceSelector } from "./ResourceSelector";
+import { UpdatesManifest } from "../models/UpdatesManifest";
 import { UpdatesManifestRepository } from "../repositories/UpdatesManifestRepository";
 import { isUpToDate } from "../utils/date";
 
+type ErrorHandler = (title: string, err: Error) => void;
+
+const emitEach = <T extends any[]>(
+  handlers: ((...args: T) => void)[],
+  ...args: T
+) => {
+  handlers.forEach((handler) => {
+    handler(...args);
+  });
+};
+
 export class Service {
+  private errorListeners: ErrorHandler[] = [];
+
   constructor(
     private preferencesRepository: PreferencesRepository,
     private autoLaunch: AutoLaunch,
@@ -46,6 +61,10 @@ export class Service {
     private observationRegistrar: ObservationRegistrar,
     private resourceRegistrar: ResourceRegistrar
   ) {}
+
+  public addErrorLister = (handler: ErrorHandler) => {
+    this.errorListeners.push(handler);
+  };
 
   public putInstallationIntoTaskQueue = async (installation: Installation) => {
     // InstallationProgressを生成
@@ -81,7 +100,9 @@ export class Service {
     await this.installationRepoisotry.updateStatus(installationId, status);
   };
 
-  public addBms = async (manifestUrl: string): Promise<void> => {
+  public importBmsManifest = async (
+    manifestUrl: string
+  ): Promise<Installation[]> => {
     const bmsManifest = await this.bmsManifestRepository.fetch(manifestUrl);
     const bmsIdentity = createIdentity(
       bmsManifest.domain,
@@ -93,10 +114,32 @@ export class Service {
     await this.bmsRegistrar.updateChecked(bmsIdentity, new Date());
 
     if (bmsManifest.groupManifestUrl) {
-      const groupManifest = await this.groupManifestRepository.fetch(
-        bmsManifest.groupManifestUrl
-      );
-      await this.groupRegistrar.register(groupManifest);
+      try {
+        const groupManifest = await this.groupManifestRepository.fetch(
+          bmsManifest.groupManifestUrl
+        );
+        await this.groupRegistrar.register(groupManifest);
+      } catch (err) {
+        if (err instanceof RequestError) {
+          emitEach(
+            this.errorListeners,
+            "マニフェストの読み込みに失敗しました",
+            err
+          );
+        } else if (err instanceof ManifestInvalidError) {
+          emitEach(
+            this.errorListeners,
+            "マニフェストの形式が正しくありませんでした",
+            err
+          );
+        } else {
+          emitEach(
+            this.errorListeners,
+            "マニフェストの読み込みに失敗しました",
+            err
+          );
+        }
+      }
     }
 
     if (bmsManifest.updatesManifestUrl) {
@@ -112,6 +155,7 @@ export class Service {
       installsAdditionalResources,
       downloadUnsupportedDomains,
     } = await this.preferencesRepository.get();
+
     const resourceSelector = new ResourceSelector({
       coreResourceSelectionMethod,
       installsPatchResources,
@@ -122,13 +166,21 @@ export class Service {
       bmsManifest.resources
     );
 
+    const createdInstallations: Installation[] = [];
     for (const toBeInstalled of resourcesToBeInstalled) {
-      await this.resourceRegistrar.register(toBeInstalled, bms.id);
+      const created = await this.resourceRegistrar.register(
+        toBeInstalled,
+        bms.id
+      );
+      if (created) {
+        createdInstallations.push(created);
+      }
     }
-    return;
+
+    return createdInstallations;
   };
 
-  public addGroup = async (manifestUrl: string) => {
+  public importGroupManifest = async (manifestUrl: string) => {
     const groupManifest = await this.groupManifestRepository.fetch(manifestUrl);
 
     await this.groupRegistrar.register(groupManifest);
@@ -140,51 +192,85 @@ export class Service {
       );
     }
 
-    if (groupManifest.bmses) {
-      for (const b of groupManifest.bmses) {
-        await this.addBms(b.manifestUrl);
-      }
-    }
+    return groupManifest.bmses?.map((bms) => bms.manifestUrl) || [];
   };
 
   public checkUpdates = async () => {
     const observations = await this.observationRepository.list();
-    for (const observation of observations) {
-      const updates = await this.updatesManifestRepository.fetch(
-        observation.manifestUrl
-      );
 
-      await this.observationRepository.check(
-        observation.manifestUrl,
-        new Date()
-      );
-
-      if (!updates.bmses) continue;
-      for (const updatedBms of updates.bmses) {
-        const latestCheck = await this.bmsCheckRepository.fetch({
-          domain: updatedBms.domain,
-          domainScopedId: updatedBms.domainScopedId,
-        });
-        const shouldUpdate = latestCheck
-          ? !isUpToDate(updatedBms.updatedAt, latestCheck.checkedAt)
-          : false;
-
-        let belongsToAutoAddingGroup = false;
-        if (updatedBms.domainScopedGroupId) {
-          const corrGroup = await this.groupRepository.fetch({
-            domain: updatedBms.domain,
-            domainScopedId: updatedBms.domainScopedGroupId,
-          });
-          if (corrGroup && corrGroup.autoDownloadNewBmses) {
-            belongsToAutoAddingGroup = true;
+    const updatedBmsManifestUrlsList = await Promise.all(
+      observations.map(async (observation) => {
+        let updates: UpdatesManifest;
+        try {
+          updates = await this.updatesManifestRepository.fetch(
+            observation.manifestUrl
+          );
+        } catch (err) {
+          if (err instanceof RequestError) {
+            emitEach(
+              this.errorListeners,
+              "更新マニフェストを読み込めませんでした",
+              err
+            );
+          } else if (err instanceof ManifestInvalidError) {
+            emitEach(
+              this.errorListeners,
+              "更新マニフェストの形式が正しくありませんでした",
+              err
+            );
+          } else {
+            emitEach(
+              this.errorListeners,
+              "更新マニフェストを読み込めませんでした",
+              err
+            );
           }
+          return null;
         }
 
-        if (shouldUpdate || belongsToAutoAddingGroup) {
-          await this.addBms(updatedBms.manifestUrl);
-        }
-      }
-    }
+        await this.observationRepository.check(
+          observation.manifestUrl,
+          new Date()
+        );
+
+        const manifestUrls = await Promise.all(
+          (updates.bmses || []).map(async (updatedBms) => {
+            const latestCheck = await this.bmsCheckRepository.fetch({
+              domain: updatedBms.domain,
+              domainScopedId: updatedBms.domainScopedId,
+            });
+            const shouldUpdate = latestCheck
+              ? !isUpToDate(updatedBms.updatedAt, latestCheck.checkedAt)
+              : false;
+
+            let belongsToAutoAddingGroup = false;
+            if (updatedBms.domainScopedGroupId) {
+              const corrGroup = await this.groupRepository.fetch({
+                domain: updatedBms.domain,
+                domainScopedId: updatedBms.domainScopedGroupId,
+              });
+              if (corrGroup && corrGroup.autoDownloadNewBmses) {
+                belongsToAutoAddingGroup = true;
+              }
+            }
+
+            if (shouldUpdate || belongsToAutoAddingGroup) {
+              return updatedBms.manifestUrl;
+            } else {
+              return null;
+            }
+          })
+        );
+
+        return manifestUrls;
+      })
+    );
+
+    const updatedBmsManifestUrls = updatedBmsManifestUrlsList
+      .flat()
+      .filter((v): v is string => !!v);
+
+    return updatedBmsManifestUrls;
   };
 }
 

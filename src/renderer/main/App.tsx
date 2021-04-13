@@ -80,14 +80,18 @@ const App: React.FC = () => {
       })}
       <button
         onClick={() => {
-          api.requestAddBms("https://venue.bmssearch.net/boots_updates");
+          api.requestAddBms(
+            "https://www.dropbox.com/s/2mtn5tyr9pz99ip/bms.json?dl=1"
+          );
         }}
       >
         aaa
       </button>
       <button
         onClick={() => {
-          api.requestAddGroup("https://venue.bmssearch.net/boots_updates");
+          api.requestAddGroup(
+            "https://www.dropbox.com/s/2mtn5tyr9pz99ip/bms.json?dl=1"
+          );
         }}
       >
         aaa
