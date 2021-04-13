@@ -26,7 +26,7 @@ export class MainWindow {
   private create = () => {
     this.win = new BrowserWindow({
       height: 600,
-      width: 600,
+      width: 400,
       skipTaskbar: true,
       frame: false,
       webPreferences: {
@@ -38,7 +38,5 @@ export class MainWindow {
     this.win.on("blur", () => {
       this.win?.hide();
     });
-
-    this.win.webContents.openDevTools();
   };
 }

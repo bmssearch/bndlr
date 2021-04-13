@@ -14,6 +14,7 @@ export class DeeplinkHandler {
       if (!params.url) return;
       this.appEventEmitter.emit("importBmsManifest", {
         manifestUrl: params.url,
+        notifyEmptyResult: true,
       });
     });
 

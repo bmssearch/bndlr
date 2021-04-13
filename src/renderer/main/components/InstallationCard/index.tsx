@@ -71,7 +71,11 @@ export const InstallationCard: React.FC<Props> = ({
       <p className={styles.bms} style={{ marginTop: 2 }}>
         {installation.resource.bms.title}
       </p>
-      <p className={styles.url} style={{ marginTop: 4 }}>
+      <p
+        className={styles.url}
+        style={{ marginTop: 4 }}
+        title={installation.resource.url}
+      >
         {installation.resource.url}
       </p>
       <p className={styles.updated_at}>

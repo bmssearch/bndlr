@@ -1,4 +1,4 @@
-import { app, dialog } from "electron";
+import { Menu, app, dialog } from "electron";
 
 import { AppEventEmitter } from "./AppHandler/types";
 import { AppHandler } from "./AppHandler";
@@ -98,13 +98,18 @@ export class BndlrApp {
     });
     trayWindow.setWindowSize({ margin_x: 10, margin_y: 10 });
 
-    // Menu.setApplicationMenu(null);
+    Menu.setApplicationMenu(null);
 
     app.on("second-instance", (e, argv) => {
       console.log("DEEPLINKING");
+      this.mainWindow.show();
       const rawUrl = argv.find((arg) => arg.startsWith("bndlr://"));
       if (!rawUrl) return;
-      this.deeplinkHandler.handle(rawUrl);
+
+      // workaround: notifications are not shown immediately after launching a second instance
+      setTimeout(() => {
+        this.deeplinkHandler.handle(rawUrl);
+      }, 200);
     });
 
     app.on("window-all-closed", () => {

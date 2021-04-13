@@ -4,12 +4,14 @@
   padding: 20px;
   display: grid;
   border-bottom: 1px solid $MIDNIGHT_BORDER;
+  grid-template-columns: 20px 1fr 100px;
   grid-template-areas:
     "icon type updated_at"
     "icon bms actions"
     "icon url actions"
     "empty status status";
   row-gap: 2px;
+  column-gap: 8px;
 
   &:hover {
     background-color: $MIDNIGHT_50;
@@ -45,6 +47,7 @@
   font-size: 14px;
   color: $MIDNIGHT_900;
   grid-area: type;
+  word-break: break-all;
 }
 
 .bms {
@@ -52,6 +55,7 @@
   font-weight: bold;
   color: $MIDNIGHT_900;
   grid-area: bms;
+  word-break: break-all;
 }
 
 .url {
@@ -73,6 +77,7 @@
 
 .actions {
   display: flex;
+  justify-content: flex-end;
   grid-area: actions;
 }
 
