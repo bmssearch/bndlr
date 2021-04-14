@@ -4,8 +4,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 20px;
+  padding: 8px 20px 8px 12px;
   border-bottom: 1px solid $MIDNIGHT_BORDER;
+}
+
+.logo {
+  display: block;
+  height: 28px;
 }
 
 .title {

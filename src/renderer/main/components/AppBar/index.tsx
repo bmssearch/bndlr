@@ -1,6 +1,7 @@
 import React from "react";
 import { api } from "../../../../api/api";
 import clsx from "clsx";
+import logoImg from "./assets/logo.png";
 import menuButtonImg from "./assets/menu.png";
 import styles from "./index.module.scss";
 
@@ -11,7 +12,7 @@ interface Props {
 export const AppBar: React.FC<Props> = ({ className }) => {
   return (
     <div className={clsx(styles.wrapper, className)}>
-      <p>bndlr</p>
+      <img className={styles.logo} src={logoImg} alt="" />
       <div
         className={styles.menu}
         onClick={() => {

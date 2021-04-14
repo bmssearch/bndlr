@@ -28,6 +28,7 @@ module.exports = {
         name: "bndlr",
         iconUrl:
           "https://www.dropbox.com/s/irc2mk6l7n8zrm6/app_icon_win.ico?dl=1",
+        loadingGif: "./public/loading.gif",
       },
     },
     {
