@@ -1,5 +1,7 @@
 module.exports = {
   packagerConfig: {
+    icon: "./public/app_icon",
+    platform: ["win32", "darwin"],
     protocols: [
       {
         name: "bndlr",
@@ -24,7 +26,8 @@ module.exports = {
       name: "@electron-forge/maker-squirrel",
       config: {
         name: "bndlr",
-        iconUrl: "./public/tray_icon_win_white.ico",
+        iconUrl:
+          "https://www.dropbox.com/s/irc2mk6l7n8zrm6/app_icon_win.ico?dl=1",
       },
     },
     {
