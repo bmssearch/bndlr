@@ -5,6 +5,7 @@ import { Identifier } from "../models/Identity";
 export interface GroupRepository {
   fetch: (identifier: Identifier) => Promise<Group | null>;
   list: (identifiers: Identifier[]) => Promise<Group[]>;
+  all: () => Promise<Group[]>;
 
   update: (
     id: number,

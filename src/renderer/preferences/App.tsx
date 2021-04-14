@@ -24,6 +24,7 @@ const initialValues: PreferencesInput = {
 
   downloadUnsupportedDomains: "",
   installationDist: "",
+  lr2CustomFolderDist: "",
 
   identicalDomainsList: "",
 
@@ -37,6 +38,7 @@ const App: React.FC = () => {
   const onSubmit = useCallback((data: PreferencesInput) => {
     const preferences: Preferences = {
       installationDist: data.installationDist,
+      lr2CustomFolderDist: data.lr2CustomFolderDist,
       coreResourceSelectionMethod: data.coreResourceSelectionMethod,
       installsPatchResources: data.installsPatchResources,
       installsAdditionalResources: data.installsAdditionalResources,
@@ -71,6 +73,7 @@ const App: React.FC = () => {
         "\n"
       ),
       installationDist: preferences.installationDist,
+      lr2CustomFolderDist: preferences.lr2CustomFolderDist,
 
       identicalDomainsList: preferences.identicalDomainsList
         .map((v) => v.join(","))

@@ -3,6 +3,7 @@ type CoreResourceSelectionMethod = "first" | "latest";
 
 export interface PreferencesInput {
   installationDist: string;
+  lr2CustomFolderDist: string;
 
   coreResourceSelectionMethod: CoreResourceSelectionMethod;
   installsPatchResources: boolean;

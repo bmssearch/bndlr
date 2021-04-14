@@ -1,4 +1,8 @@
-import { ManifestInvalidError, RequestError } from "../../core/models/errors";
+import {
+  DestinationNotFoundError,
+  ManifestInvalidError,
+  RequestError,
+} from "../../core/models/errors";
 import { app, dialog } from "electron";
 
 import { AppEventEmitter } from "./types";
@@ -218,6 +222,25 @@ export class AppHandler {
 
     this.emitter.on("quitApp", () => {
       app.exit();
+    });
+
+    this.emitter.on("exportLr2CustomFolders", async () => {
+      try {
+        await this.service.exportLr2CustomFolders();
+        this.notificator.show("LR2カスタムフォルダの出力が完了しました");
+      } catch (err) {
+        if (err instanceof DestinationNotFoundError) {
+          dialog.showErrorBox(
+            "LR2カスタムフォルダ出力先を設定してください",
+            err.message
+          );
+        } else {
+          dialog.showErrorBox(
+            "カスタムフォルダの出力に失敗しました",
+            err.message
+          );
+        }
+      }
     });
   };
 }

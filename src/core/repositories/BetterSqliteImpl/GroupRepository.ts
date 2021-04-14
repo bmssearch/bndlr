@@ -31,6 +31,12 @@ export class BetterSqliteGroupRepository implements GroupRepository {
     return dbGroups.map(dbToGroup);
   };
 
+  public all = async () => {
+    const st = this.dbc.db().prepare("SELECT * FROM groups");
+    const dbGroups: DBGroup[] = st.all();
+    return dbGroups.map(dbToGroup);
+  };
+
   public update = async (
     id: number,
     groupManifest: GroupManifest,

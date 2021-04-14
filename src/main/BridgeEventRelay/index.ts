@@ -41,6 +41,12 @@ export class BridgeEventRelay {
           },
         },
         {
+          label: "LR2用カスタムフォルダを出力",
+          click: () => {
+            this.appEventEmitter.emit("exportLr2CustomFolders", {});
+          },
+        },
+        {
           label: "更新チェック",
           click: () => {
             this.appEventEmitter.emit("checkUpdates", {});

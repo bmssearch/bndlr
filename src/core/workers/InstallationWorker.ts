@@ -2,8 +2,8 @@ import { Queue, QueueItem } from "../adapters/Queue";
 
 import { DestinationNotFoundError } from "../app/ResourceInstaller/errors";
 import { ExceedsMaximumSizeError } from "../adapters/Downloader/errors";
+import { IdentifiedFileNamer } from "../app/IdentifiedFileNamer";
 import { Installation } from "../models/Installation";
-import { InstallationFolderNamer } from "../app/InstallationFolderNamer";
 import { PreferencesRepository } from "../repositories/PreferencesRepository";
 import { ResourceInstallerFactory } from "../app/ResourceInstaller";
 import { ResourceInstallerProgress } from "../app/ResourceInstaller/types";
@@ -26,7 +26,7 @@ export class InstallationWorker {
     private preferenceRepository: PreferencesRepository,
     private queue: Queue<Installation, ResourceInstallerProgress>,
     private resourceInstallerFactory: ResourceInstallerFactory,
-    private installationFolderNamer: InstallationFolderNamer
+    private installationFolderNamer: IdentifiedFileNamer
   ) {}
 
   public start = () => {

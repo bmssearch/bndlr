@@ -1,34 +1,32 @@
 import { FormikType } from "../types";
 import React from "react";
+import { api } from "../../../api/api";
 
 interface Props {
   formik: FormikType;
 }
-export const GroupTab: React.FC<Props> = () => {
+export const GroupTab: React.FC<Props> = ({ formik }) => {
   return (
     <div>
-      <table>
-        <thead>
-          <tr>
-            <th>domain</th>
-            <th>グループ</th>
-            <th>自動追加</th>
-            <th>カスタムフォルダ</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>venue.bmssearch.net</td>
-            <td>グループ</td>
-            <td>
-              <input type="checkbox" />
-            </td>
-            <td>
-              <input type="checkbox" />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <p>LR2カスタムフォルダインストール先</p>
+      <div style={{ display: "flex" }}>
+        <input
+          type="text"
+          disabled={true}
+          value={formik.values.lr2CustomFolderDist}
+          style={{ flex: 1, marginRight: 4 }}
+        />
+        <button
+          type="button"
+          onClick={async () => {
+            const path = await api.selectDirectory();
+            if (!path) return;
+            formik.setFieldValue("lr2CustomFolderDist", path);
+          }}
+        >
+          選択
+        </button>
+      </div>
     </div>
   );
 };

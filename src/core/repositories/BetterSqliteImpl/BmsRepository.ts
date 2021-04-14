@@ -25,7 +25,15 @@ export class BetterSqlBmsRepository implements BmsRepository {
     const st = this.dbc
       .db()
       .prepare("SELECT * FROM group_bmses WHERE groupId = ?");
-    const dbBmses: DBBms[] = st.all(groupId);
+
+    const idSets: { groupId: number; bmsId: number }[] = st.all(groupId);
+
+    const bst = this.dbc.db().prepare("SELECT * FROM bmses WHERE id = ?");
+    const tx = this.dbc.db().transaction((bmsIds: number[]) => {
+      return bmsIds.map((bmsId) => bst.get(bmsId));
+    });
+
+    const dbBmses: DBBms[] = tx(idSets.map((v) => v.bmsId));
     return dbBmses.map(dbToBms);
   };
 

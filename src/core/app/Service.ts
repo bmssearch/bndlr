@@ -2,8 +2,12 @@ import {
   CrossDomainIdentifierFactory,
   IdentityFactory,
 } from "../models/Identity";
+import {
+  DestinationNotFoundError,
+  ManifestInvalidError,
+  RequestError,
+} from "../models/errors";
 import { Installation, InstallationStatus } from "../models/Installation";
-import { ManifestInvalidError, RequestError } from "../models/errors";
 
 import AutoLaunch from "auto-launch";
 import { BmsCheckRepository } from "../repositories/BmsCheckRepository";
@@ -15,6 +19,7 @@ import { GroupRegistrar } from "./GroupRegistrar";
 import { GroupRepository } from "../repositories/GroupRepository";
 import { InstallationRepository } from "../repositories/InstallationRepository";
 import { InstallationWorker } from "../workers/InstallationWorker";
+import { Lr2CustomFolderExporter } from "./CustomFolderExporter/Lr2CustomFolderExporter";
 import { ObservationRegistrar } from "./ObservationRegistrar";
 import { ObservationRepository } from "../repositories/ObservationRepository";
 import { Preferences } from "../models/Preference";
@@ -294,5 +299,30 @@ export class Service {
       .filter((v): v is string => !!v);
 
     return updatedBmsManifestUrls;
+  };
+
+  public exportLr2CustomFolders = async () => {
+    const { lr2CustomFolderDist } = await this.preferencesRepository.get();
+
+    if (!lr2CustomFolderDist) {
+      throw new DestinationNotFoundError(
+        "カスタムフォルダの出力先がありません"
+      );
+    }
+
+    const groups = await this.groupRepository.all();
+    const groupBmsList = await Promise.all(
+      groups.map(async (group) => {
+        const bmses = await this.bmsRepository.listForGroup(group.id);
+        return {
+          group,
+          bmses,
+        };
+      })
+    );
+
+    const c = new Lr2CustomFolderExporter(lr2CustomFolderDist, groupBmsList);
+    await c.clean();
+    await c.export();
   };
 }

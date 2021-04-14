@@ -26,6 +26,8 @@ export interface AppEventList {
   finishInstallation: { installationId: number };
   failInstallation: { installationId: number };
 
+  exportLr2CustomFolders: Record<string, never>;
+
   quitApp: Record<string, never>;
 }
 

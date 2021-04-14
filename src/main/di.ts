@@ -19,8 +19,8 @@ import { DropboxDownloadUrlModifier } from "../core/adapters/DownloadUrlModifier
 import { EventEmitterQueue } from "../core/adapters/Queue";
 import { ExtractorFactoryAbstract } from "../core/adapters/Extractor";
 import { GroupRegistrar } from "../core/app/GroupRegistrar";
+import { IdentifiedFileNamer } from "../core/app/IdentifiedFileNamer";
 import { Installation } from "../core/models/Installation";
-import { InstallationFolderNamer } from "../core/app/InstallationFolderNamer";
 import { InstallationWorker } from "../core/workers/InstallationWorker";
 import { MainWindow } from "./windows/MainWindow";
 import { NetworkBmsManifestRepository } from "../core/repositories/BmsManifestRepository";
@@ -102,7 +102,7 @@ const resourceInstallerFactory = new ResourceInstallerFactory(
   antiClutterDirectoryLocator
 );
 
-const installationFolderNamer = new InstallationFolderNamer();
+const installationFolderNamer = new IdentifiedFileNamer();
 
 const installationQueue = new EventEmitterQueue<
   Installation,

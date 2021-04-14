@@ -8,6 +8,7 @@ export interface PreferencesRepository {
 
 const initialPreferences: Preferences = {
   installationDist: "",
+  lr2CustomFolderDist: "",
 
   coreResourceSelectionMethod: "first",
   installsPatchResources: false,

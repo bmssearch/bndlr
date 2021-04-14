@@ -27,15 +27,14 @@ export const Menu: React.FC<Props> = ({ tab, onChange }) => {
         </button>
       </li>
 
-      {/* 急激に面倒になったのでファーストリリースには入れないことにした */}
-      {/* <li>
+      <li>
         <button
           className={clsx(styles.tab, tab === "group" && styles.active)}
           onClick={() => onChange("group")}
         >
           グループ
         </button>
-      </li> */}
+      </li>
 
       <li>
         <button
