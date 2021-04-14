@@ -138,6 +138,7 @@ export class AppHandler {
     });
     this.emitter.on("setPreferences", async ({ preferences }) => {
       await this.service.setPreferences(preferences);
+      this.relay.deliver("preferencesLoaded", { preferences });
     });
     this.emitter.on("openPreferencesWindow", () => {
       this.preferencesWindow.show();

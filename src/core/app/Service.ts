@@ -111,7 +111,6 @@ export class Service {
     manifestUrl: string
   ): Promise<Installation[]> => {
     const { identicalDomainsList } = await this.preferencesRepository.get();
-
     const cdIdentifierFactory = new CrossDomainIdentifierFactory(
       identicalDomainsList
     );
@@ -131,12 +130,14 @@ export class Service {
 
     await this.bmsRegistrar.updateChecked(bmsIdentity, new Date());
 
-    if (bmsManifest.groupManifestUrl) {
+    for (const groupManifestUrl of bmsManifest.groupManifestUrls || []) {
       try {
         const groupManifest = await this.groupManifestRepository.fetch(
-          bmsManifest.groupManifestUrl
+          groupManifestUrl
         );
-        await this.groupRegistrar.register(groupManifest);
+        const group = await this.groupRegistrar.register(groupManifest, false);
+
+        this.groupRepository.addBms(group.id, bms.id);
       } catch (err) {
         if (err instanceof RequestError) {
           emitEach(
@@ -153,7 +154,7 @@ export class Service {
         } else {
           emitEach(
             this.errorListeners,
-            "グループマニフェストの読み込みに失敗しました",
+            "グループマニフェストの登録に失敗しました",
             err
           );
         }
@@ -201,7 +202,7 @@ export class Service {
   public importGroupManifest = async (manifestUrl: string) => {
     const groupManifest = await this.groupManifestRepository.fetch(manifestUrl);
 
-    await this.groupRegistrar.register(groupManifest);
+    await this.groupRegistrar.register(groupManifest, true);
 
     if (groupManifest.updatesManifestUrl) {
       await this.observationRegistrar.register(
@@ -262,12 +263,16 @@ export class Service {
               : false;
 
             let belongsToAutoAddingGroup = false;
-            if (updatedBms.domainScopedGroupId) {
-              const corrGroup = await this.groupRepository.fetch({
-                domain: updatedBms.domain,
-                domainScopedId: updatedBms.domainScopedGroupId,
-              });
-              if (corrGroup && corrGroup.autoDownloadNewBmses) {
+            if (updatedBms.domainScopedGroupIds) {
+              const corrGroups = await Promise.all(
+                updatedBms.domainScopedGroupIds.map((domainScopedGroupId) => {
+                  return this.groupRepository.fetch({
+                    domain: updatedBms.domain,
+                    domainScopedId: domainScopedGroupId,
+                  });
+                })
+              );
+              if (corrGroups.some((g) => g && g.autoDownloadNewBmses)) {
                 belongsToAutoAddingGroup = true;
               }
             }

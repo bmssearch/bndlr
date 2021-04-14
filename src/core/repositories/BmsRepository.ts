@@ -4,6 +4,7 @@ import { Identifier } from "../models/Identity";
 
 export interface BmsRepository {
   list: (identifiers: Identifier[]) => Promise<Bms[]>;
+  listForGroup: (groupId: number) => Promise<Bms[]>;
 
   update: (id: number, bmsManifest: BmsManifest) => Promise<void>;
   create: (bmsManifest: BmsManifest) => Promise<Bms>;

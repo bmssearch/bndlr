@@ -10,7 +10,7 @@ export interface BmsManifestAttrs {
   aliases?: Identifier[];
   title: string;
   websiteUrl?: string;
-  groupManifestUrl?: string;
+  groupManifestUrls?: string[];
   updatesManifestUrl?: string;
   resources: ResourceManifest[];
 }
@@ -22,7 +22,7 @@ export class BmsManifest implements BmsManifestAttrs {
   public aliases?: Identifier[];
   public title: string;
   public websiteUrl?: string;
-  public groupManifestUrl?: string;
+  public groupManifestUrls?: string[];
   public updatesManifestUrl?: string;
   public resources: ResourceManifest[];
 
@@ -33,7 +33,7 @@ export class BmsManifest implements BmsManifestAttrs {
     this.title = attrs.title;
     this.aliases = attrs.aliases;
     this.websiteUrl = attrs.websiteUrl;
-    this.groupManifestUrl = attrs.groupManifestUrl;
+    this.groupManifestUrls = attrs.groupManifestUrls;
     this.updatesManifestUrl = attrs.updatesManifestUrl;
     this.resources = attrs.resources;
   }
@@ -53,7 +53,7 @@ export class BmsManifest implements BmsManifestAttrs {
       aliases,
       title: spec.title,
       websiteUrl: spec.website_url,
-      groupManifestUrl: spec.group_url,
+      groupManifestUrls: spec.group_urls,
       updatesManifestUrl: spec.updates_url,
       resources,
     });

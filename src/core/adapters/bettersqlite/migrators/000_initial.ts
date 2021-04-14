@@ -44,6 +44,16 @@ const migrator: Migrator = {
     `);
 
     db.exec(`
+      CREATE TABLE group_bmses (
+        groupId INTEGER NOT NULL,
+        bmsId INTEGER NOT NULL,
+        UNIQUE (groupId, bmsId),
+        FOREIGN KEY (groupId) REFERENCES groups(id),
+        FOREIGN KEY (bmsId) REFERENCES bmses(id)
+      )
+    `);
+
+    db.exec(`
       CREATE TABLE resources (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         bmsId INTEGER NOT NULL,
@@ -72,6 +82,7 @@ const migrator: Migrator = {
     db.exec("DROP TABLE bms_checks");
     db.exec("DROP TABLE observations");
     db.exec("DROP TABLE groups");
+    db.exec("DROP TABLE group_bmses");
     db.exec("DROP TABLE resources");
     db.exec("DROP TABLE installations");
   },

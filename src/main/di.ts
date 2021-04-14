@@ -58,12 +58,12 @@ const resourceRepoisotry = new BetterSqliteResourceRepository(dbc);
 const installationRepository = new BetterSqliteInstallationRepository(dbc);
 
 const bmsRegistrar = new BmsRegistrar(
-  bmsManifestRepository,
+  preferencesRepository,
   bmsRepository,
   bmsCheckRepository
 );
 const groupRegistrar = new GroupRegistrar(
-  groupManifestRepository,
+  preferencesRepository,
   groupRepository
 );
 const resourceRegistrar = new ResourceRegistrar(

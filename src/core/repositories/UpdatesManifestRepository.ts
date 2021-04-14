@@ -35,7 +35,7 @@ export class NetworkUpdatesManifestRepository
     }
 
     try {
-      const group = UpdateManifestLib.assert(json);
+      const group = UpdateManifestLib.cast(json);
       const manifest = UpdatesManifest.fromRawManifest(manifestUrl, group);
       return manifest;
     } catch (err) {

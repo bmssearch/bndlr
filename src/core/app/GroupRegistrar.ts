@@ -4,19 +4,23 @@ import {
 } from "../models/Identity";
 
 import { GroupManifest } from "../models/GroupManifest";
-import { GroupManifestRepository } from "../repositories/GroupManifestRepository";
 import { GroupRepository } from "../repositories/GroupRepository";
+import { PreferencesRepository } from "../repositories/PreferencesRepository";
 
 export class GroupRegistrar {
   constructor(
-    private groupManifestRepository: GroupManifestRepository,
+    private preferencesRepository: PreferencesRepository,
     private groupRepository: GroupRepository
   ) {}
 
-  public register = async (groupManifest: GroupManifest) => {
-    const cdIdentifierFactory = new CrossDomainIdentifierFactory([
-      ["bmssearch.net", "venue.bmssearch.net", "ringo.com"],
-    ]);
+  public register = async (
+    groupManifest: GroupManifest,
+    autoAddNewBmses: boolean
+  ) => {
+    const { identicalDomainsList } = await this.preferencesRepository.get();
+    const cdIdentifierFactory = new CrossDomainIdentifierFactory(
+      identicalDomainsList
+    );
     const identityFactory = new IdentityFactory(cdIdentifierFactory);
 
     const identity = identityFactory.create(
@@ -24,7 +28,7 @@ export class GroupRegistrar {
         domain: groupManifest.domain,
         domainScopedId: groupManifest.domainScopedId,
       },
-      [{ domain: "ringo.com", domainScopedId: "didid" }]
+      groupManifest.aliases
     );
 
     const groups = await this.groupRepository.list(
@@ -36,7 +40,7 @@ export class GroupRegistrar {
         await this.groupRepository.update(group.id, groupManifest);
       }
     } else {
-      group = await this.groupRepository.create(groupManifest);
+      group = await this.groupRepository.create(groupManifest, autoAddNewBmses);
     }
 
     return group;

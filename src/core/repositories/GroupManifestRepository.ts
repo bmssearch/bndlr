@@ -34,7 +34,7 @@ export class NetworkGroupManifestRepository implements GroupManifestRepository {
     }
 
     try {
-      const group = GroupManifestLib.assert(json);
+      const group = GroupManifestLib.cast(json);
       const manifest = GroupManifest.fromRawManifest(manifestUrl, group);
       return manifest;
     } catch (err) {

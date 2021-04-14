@@ -10,7 +10,7 @@ interface UpdatesManifestBms {
   domain: string;
   domainScopedId: string;
   manifestUrl: string;
-  domainScopedGroupId?: string;
+  domainScopedGroupIds?: string[];
   updatedAt?: Date;
 }
 
@@ -33,7 +33,7 @@ export class UpdatesManifest implements UpdatesManifestAttrs {
         domain,
         domainScopedId: bms.id,
         manifestUrl: bms.url,
-        domainScopedGroupId: bms.group_id,
+        domainScopedGroupIds: bms.group_ids,
         updatedAt: bms.updated_at ? new Date(bms.updated_at) : undefined,
       })
     );

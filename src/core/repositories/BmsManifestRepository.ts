@@ -34,7 +34,7 @@ export class NetworkBmsManifestRepository implements BmsManifestRepository {
     }
 
     try {
-      const bms = BmsManifestLib.assert(json);
+      const bms = BmsManifestLib.cast(json);
       const manifest = BmsManifest.fromSpec(manifestUrl, bms);
       return manifest;
     } catch (err) {

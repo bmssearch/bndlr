@@ -6,6 +6,15 @@ export interface GroupRepository {
   fetch: (identifier: Identifier) => Promise<Group | null>;
   list: (identifiers: Identifier[]) => Promise<Group[]>;
 
-  update: (id: number, groupManifest: GroupManifest) => Promise<void>;
-  create: (groupManifest: GroupManifest) => Promise<Group>;
+  update: (
+    id: number,
+    groupManifest: GroupManifest,
+    autoAddNewBmses?: boolean
+  ) => Promise<void>;
+  create: (
+    groupManifest: GroupManifest,
+    autoInstallNewBmses: boolean
+  ) => Promise<Group>;
+
+  addBms: (groupId: number, bmsId: number) => Promise<void>;
 }

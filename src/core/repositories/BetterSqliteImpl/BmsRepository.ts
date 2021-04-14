@@ -21,6 +21,14 @@ export class BetterSqlBmsRepository implements BmsRepository {
     return dbBmses.map(dbToBms);
   };
 
+  public listForGroup = async (groupId: number) => {
+    const st = this.dbc
+      .db()
+      .prepare("SELECT * FROM group_bmses WHERE groupId = ?");
+    const dbBmses: DBBms[] = st.all(groupId);
+    return dbBmses.map(dbToBms);
+  };
+
   public update = async (id: number, bmsManifest: BmsManifest) => {
     const st = this.dbc.db().prepare("UPDATE bmses SET title = ? WHERE id = ?");
     st.run(bmsManifest.title, id);

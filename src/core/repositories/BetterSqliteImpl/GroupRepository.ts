@@ -31,12 +31,30 @@ export class BetterSqliteGroupRepository implements GroupRepository {
     return dbGroups.map(dbToGroup);
   };
 
-  public update = async (id: number, groupManifest: GroupManifest) => {
-    const st = this.dbc.db().prepare("UPDATE groups SET name = ? WHERE id = ?");
-    st.run(groupManifest.name, id);
+  public update = async (
+    id: number,
+    groupManifest: GroupManifest,
+    autoAddNewBmses?: boolean
+  ) => {
+    if (autoAddNewBmses !== undefined) {
+      const st = this.dbc
+        .db()
+        .prepare("UPDATE groups SET name = ? WHERE id = ?");
+      st.run(groupManifest.name, id);
+    } else {
+      const st = this.dbc
+        .db()
+        .prepare(
+          "UPDATE groups SET name = ?, autoAddNewBmses = ? WHERE id = ?"
+        );
+      st.run(groupManifest.name, id, autoAddNewBmses ? 1 : 0);
+    }
   };
 
-  public create = async (groupManifest: GroupManifest): Promise<Group> => {
+  public create = async (
+    groupManifest: GroupManifest,
+    autoAddNewBmses: boolean
+  ): Promise<Group> => {
     const st = this.dbc
       .db()
       .prepare(
@@ -46,11 +64,20 @@ export class BetterSqliteGroupRepository implements GroupRepository {
       domain: groupManifest.domain,
       domainScopedId: groupManifest.domainScopedId,
       name: groupManifest.name,
-      autoAddNewBmses: 1,
+      autoAddNewBmses: autoAddNewBmses ? 1 : 0,
     });
 
     const gst = this.dbc.db().prepare("SELECT * FROM groups WHERE id = ?");
     const dbGroup: DBGroup = gst.get(info.lastInsertRowid);
     return dbToGroup(dbGroup);
+  };
+
+  public addBms = async (groupId: number, bmsId: number): Promise<void> => {
+    const st = this.dbc
+      .db()
+      .prepare(
+        "INSERT OR IGNORE INTO group_bmses (groupId, bmsId) VALUES (?,?)"
+      );
+    st.run(groupId, bmsId);
   };
 }

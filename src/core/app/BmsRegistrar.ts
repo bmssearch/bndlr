@@ -6,20 +6,21 @@ import {
 
 import { BmsCheckRepository } from "../repositories/BmsCheckRepository";
 import { BmsManifest } from "../models/BmsManifest";
-import { BmsManifestRepository } from "../repositories/BmsManifestRepository";
 import { BmsRepository } from "../repositories/BmsRepository";
+import { PreferencesRepository } from "../repositories/PreferencesRepository";
 
 export class BmsRegistrar {
   constructor(
-    private bmsManifestRepository: BmsManifestRepository,
+    private preferencesRepository: PreferencesRepository,
     private bmsRepository: BmsRepository,
     private bmsCheckRepository: BmsCheckRepository
   ) {}
 
   public register = async (bmsManifest: BmsManifest) => {
-    const cdIdentifierFactory = new CrossDomainIdentifierFactory([
-      ["bmssearch.net", "venue.bmssearch.net", "ringo.com"],
-    ]);
+    const { identicalDomainsList } = await this.preferencesRepository.get();
+    const cdIdentifierFactory = new CrossDomainIdentifierFactory(
+      identicalDomainsList
+    );
     const identityFactory = new IdentityFactory(cdIdentifierFactory);
 
     const identity = identityFactory.create(
@@ -27,7 +28,7 @@ export class BmsRegistrar {
         domain: bmsManifest.domain,
         domainScopedId: bmsManifest.domainScopedId,
       },
-      [{ domain: "ringo.com", domainScopedId: "didid" }]
+      bmsManifest.aliases
     );
 
     // register bms

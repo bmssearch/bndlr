@@ -21,7 +21,9 @@ export class MainWindow {
     channel: K,
     params: BridgeEventList[K]
   ) => {
-    this.win?.webContents.send(channel, params);
+    if (this.win && !this.win.isDestroyed()) {
+      this.win.webContents.send(channel, params);
+    }
   };
 
   public create = () => {
