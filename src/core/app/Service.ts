@@ -130,19 +130,19 @@ export class Service {
         if (err instanceof RequestError) {
           emitEach(
             this.errorListeners,
-            "マニフェストの読み込みに失敗しました",
+            "グループマニフェストの読み込みに失敗しました",
             err
           );
         } else if (err instanceof ManifestInvalidError) {
           emitEach(
             this.errorListeners,
-            "マニフェストの形式が正しくありませんでした",
+            "グループマニフェストの形式が正しくありませんでした",
             err
           );
         } else {
           emitEach(
             this.errorListeners,
-            "マニフェストの読み込みに失敗しました",
+            "グループマニフェストの読み込みに失敗しました",
             err
           );
         }

@@ -26,7 +26,12 @@ export class NetworkGroupManifestRepository implements GroupManifestRepository {
       );
     }
 
-    const json = await res.json();
+    let json: any;
+    try {
+      json = await res.json();
+    } catch (err) {
+      throw new ManifestInvalidError("有効なJSONではありませんでした", err);
+    }
 
     try {
       const group = GroupManifestLib.assert(json);

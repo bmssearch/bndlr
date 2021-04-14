@@ -27,7 +27,12 @@ export class NetworkUpdatesManifestRepository
       );
     }
 
-    const json = await res.json();
+    let json: any;
+    try {
+      json = await res.json();
+    } catch (err) {
+      throw new ManifestInvalidError("有効なJSONではありませんでした", err);
+    }
 
     try {
       const group = UpdateManifestLib.assert(json);

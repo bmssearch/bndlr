@@ -47,12 +47,12 @@ export class AppHandler {
         } catch (err) {
           if (err instanceof RequestError) {
             this.notificator.show(
-              "マニフェストを取得できませんでした",
+              "BMSマニフェストを取得できませんでした",
               err.message
             );
           } else if (err instanceof ManifestInvalidError) {
             this.notificator.show(
-              "マニフェストの形式が正しくありません",
+              "BMSマニフェストの形式が正しくありません",
               err.message
             );
           } else {
@@ -81,12 +81,12 @@ export class AppHandler {
       } catch (err) {
         if (err instanceof RequestError) {
           this.notificator.show(
-            "マニフェストを取得できませんでした",
+            "グループマニフェストを取得できませんでした",
             err.message
           );
         } else if (err instanceof ManifestInvalidError) {
           this.notificator.show(
-            "マニフェストの形式が正しくありません",
+            "グループマニフェストの形式が正しくありません",
             err.message
           );
         } else {

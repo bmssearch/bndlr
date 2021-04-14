@@ -4,6 +4,8 @@ import "../global.scss";
 import React, { useMemo } from "react";
 
 import { AppBar } from "./components/AppBar";
+import { DestinationEmptyBanner } from "./components/DestinationEmptyBanner";
+import { EmptyView } from "./components/EmptyView";
 import { GroupedInstallationCard } from "./components/GroupedInstallationCard";
 import { Header } from "./components/Header";
 import { InstallationCard } from "./components/InstallationCard";
@@ -12,10 +14,12 @@ import { chain } from "lodash";
 import styles from "./App.module.scss";
 import { useInstallationProgresses } from "../fetcher/useInstallationProgresses";
 import { useInstallations } from "../fetcher/useInstallations";
+import { usePreferences } from "../fetcher/usePreferences";
 
 const App: React.FC = () => {
   const installations = useInstallations();
   const progressMap = useInstallationProgresses();
+  const preferences = usePreferences();
 
   const proposedBmsGroups = useMemo(() => {
     const proposedInstallations = installations?.filter(
@@ -28,11 +32,15 @@ const App: React.FC = () => {
     return res;
   }, [installations, progressMap]);
 
-  if (!installations) return null;
+  if (!installations || !preferences) return null;
 
   return (
     <div className={styles.wrapper}>
       <AppBar className={styles.app_bar} />
+      {!preferences.installationDist && <DestinationEmptyBanner />}
+
+      {installations.length === 0 && <EmptyView />}
+
       {proposedBmsGroups.length > 0 && <Header title="一括" />}
       {proposedBmsGroups.map((proposedBmsGroup) => (
         <GroupedInstallationCard
@@ -67,7 +75,8 @@ const App: React.FC = () => {
           }}
         />
       ))}
-      <Header title="個別" />
+
+      {installations.length > 0 && <Header title="個別" />}
       {installations.map((installation) => {
         const progress = progressMap.get(installation.id);
         return (
@@ -80,6 +89,7 @@ const App: React.FC = () => {
               );
               if (
                 proposedCoreInstallation &&
+                installation.resource.type !== "core" &&
                 confirm(
                   `未インストールの本体も一緒にインストールしますか？\n\n${proposedCoreInstallation.resource.url}`
                 )
