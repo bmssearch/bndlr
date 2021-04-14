@@ -41,10 +41,10 @@ import { ZipExtractor } from "../core/adapters/Extractor/ZipExtractor";
 import { app } from "electron";
 import path from "path";
 
-const dbc = new DatabaseConnector();
-
 const autoLaunch = new AutoLaunch({ name: "bndlr" });
 const preferencesRepository = new StorePreferencesRepository();
+
+const dbc = new DatabaseConnector();
 
 const bmsManifestRepository = new NetworkBmsManifestRepository();
 const groupManifestRepository = new NetworkGroupManifestRepository();

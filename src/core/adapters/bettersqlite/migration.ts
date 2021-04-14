@@ -1,17 +1,19 @@
 import { JSONStorage, Umzug } from "umzug";
 
 import { Database } from "better-sqlite3";
+import { app } from "electron";
 import migrator000Initial from "./migrators/000_initial";
+import path from "path";
 
-const createMigrator = (db: Database) =>
-  new Umzug({
+export const migrate = async (db: Database) => {
+  const migrator = new Umzug({
     migrations: [migrator000Initial],
     context: db,
-    storage: new JSONStorage(),
+    storage: new JSONStorage({
+      path: path.join(app.getPath("userData"), "bndlr.migration.json"),
+    }),
     logger: console,
   });
 
-export const migrate = async (db: Database) => {
-  const migrator = createMigrator(db);
   await migrator.up();
 };

@@ -1,6 +1,8 @@
 import BetterSqlite, { Database } from "better-sqlite3";
 
-import { migrate as rawMigrate } from "./migration";
+import { app } from "electron";
+import { migrate } from "./migration";
+import path from "path";
 
 export class DatabaseConnector {
   private rawDb?: Database;
@@ -14,10 +16,13 @@ export class DatabaseConnector {
   };
 
   public initialize = () => {
-    this.rawDb = new BetterSqlite("./db.sqlite", { verbose: console.log });
+    this.rawDb = new BetterSqlite(
+      path.join(app.getPath("userData"), "bndlr.sqlite"),
+      { verbose: console.log }
+    );
     this.rawDb.exec("PRAGMA foreign_keys=true");
 
-    rawMigrate(this.rawDb);
+    migrate(this.rawDb);
   };
 
   public close = () => {
