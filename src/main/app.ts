@@ -90,13 +90,15 @@ export class BndlrApp {
     this.observationWorker.start();
 
     this.appTray.show();
-    this.mainWindow.show();
+    this.mainWindow.create();
 
     trayWindow.setOptions({
       tray: this.appTray.tray,
       window: this.mainWindow.win,
     });
     trayWindow.setWindowSize({ margin_x: 10, margin_y: 10 });
+
+    this.mainWindow.show();
 
     Menu.setApplicationMenu(null);
 

@@ -92,7 +92,11 @@ export class Service {
   };
 
   public fetchInstallations = async (): Promise<Installation[]> => {
-    const installations = await this.installationRepoisotry.list();
+    // FIXME:
+    // パフォーマンスに問題あり。方針を定める必要あり。
+    // たぶんproposedとそれいがいのinstallationは別々に扱うべきかも。
+    const LIMIT = 500;
+    const installations = await this.installationRepoisotry.list(LIMIT);
     return installations;
   };
 

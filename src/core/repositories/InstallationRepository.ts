@@ -1,7 +1,7 @@
 import { Installation, InstallationStatus } from "../models/Installation";
 
 export interface InstallationRepository {
-  list: () => Promise<Installation[]>;
+  list: (limit: number) => Promise<Installation[]>;
 
   fetchLatestForResource: (resourceId: number) => Promise<Installation | null>;
 

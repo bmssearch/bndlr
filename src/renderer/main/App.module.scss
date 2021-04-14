@@ -3,5 +3,12 @@
 .wrapper {
   border: 2px solid $MIDNIGHT_BORDER_HEAVY;
   height: 100vh;
+  position: relative;
   overflow: auto;
+}
+
+.app_bar {
+  position: sticky;
+  top: 0;
+  background: $WHITE_900;
 }

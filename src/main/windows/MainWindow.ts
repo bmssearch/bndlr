@@ -13,6 +13,7 @@ export class MainWindow {
       this.win.focus();
     } else {
       this.create();
+      this.win?.show();
     }
   };
 
@@ -23,7 +24,7 @@ export class MainWindow {
     this.win?.webContents.send(channel, params);
   };
 
-  private create = () => {
+  public create = () => {
     this.win = new BrowserWindow({
       height: 600,
       width: 400,
@@ -32,6 +33,7 @@ export class MainWindow {
       webPreferences: {
         preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       },
+      show: false,
     });
     this.win.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 

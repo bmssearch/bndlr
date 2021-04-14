@@ -32,7 +32,7 @@ const App: React.FC = () => {
 
   return (
     <div className={styles.wrapper}>
-      <AppBar />
+      <AppBar className={styles.app_bar} />
       {proposedBmsGroups.length > 0 && <Header title="一括" />}
       {proposedBmsGroups.map((proposedBmsGroup) => (
         <GroupedInstallationCard

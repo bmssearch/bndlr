@@ -16,11 +16,11 @@ export class BetterSqliteInstallationRepository
   implements InstallationRepository {
   constructor(private dbc: DatabaseConnector) {}
 
-  public list = async () => {
+  public list = async (limit: number) => {
     const st = this.dbc
       .db()
-      .prepare("SELECT * FROM installations ORDER BY createdAt DESC");
-    const dbInstallations: DBInstallation[] = st.all();
+      .prepare("SELECT * FROM installations ORDER BY createdAt DESC LIMIT ?");
+    const dbInstallations: DBInstallation[] = st.all(limit);
 
     return dbInstallations.map(this.toInstallation);
   };
