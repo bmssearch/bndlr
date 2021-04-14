@@ -24,11 +24,11 @@ module.exports = {
       name: "@electron-forge/maker-squirrel",
       config: {
         name: "bndlr",
+        iconUrl: "./public/tray_icon_win_white.ico",
       },
     },
     {
       name: "@electron-forge/maker-zip",
-      platforms: ["darwin"],
     },
   ],
   plugins: [
