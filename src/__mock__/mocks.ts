@@ -10,7 +10,7 @@ export const mockBmsManifest: BmsManifest = {
   domain: "venue.bmssearch.net",
   domainScopedId: "test_id3",
   title: "Falling Cxte",
-  groupManifestUrl: "https://venue.bmssearch.net/bmsshuin3/bbs",
+  groupManifestUrls: ["https://venue.bmssearch.net/bmsshuin3/bbs"],
   updatesManifestUrl: "https://venue.bmssearch.net/boots_updates2",
   resources: [
     {
@@ -57,14 +57,14 @@ export const mockUpdatesManifest = new UpdatesManifest({
       domain: "bmssearch.net",
       domainScopedId: "id",
       manifestUrl: "https://bmssearch.net/werwer",
-      domainScopedGroupId: "werwer",
+      domainScopedGroupIds: ["werwer"],
       updatedAt: new Date(),
     },
     {
       domain: "venue.bmssearch.net",
       domainScopedId: "test_id3",
       manifestUrl: "https://bmssearch.net/werwer",
-      domainScopedGroupId: "werwer",
+      domainScopedGroupIds: ["werwer"],
       updatedAt: new Date(),
     },
   ],

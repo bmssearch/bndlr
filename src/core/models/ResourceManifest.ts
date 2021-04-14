@@ -1,4 +1,4 @@
-import { Resource as BbsBmsResource } from "@bmssearch/bms-bundle-manifest";
+import { BmsResource as BbsBmsResource } from "@bmssearch/bms-bundle-manifest";
 
 export interface ResourceManifestAttrs {
   url: string;
