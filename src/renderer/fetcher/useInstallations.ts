@@ -12,9 +12,7 @@ export const useInstallations = () => {
 
   useEffect(() => {
     return api.listenToInstallations((event, { installations }) => {
-      setInstallations(
-        installations.concat(installations).concat(installations)
-      );
+      setInstallations(installations);
     });
   }, []);
 

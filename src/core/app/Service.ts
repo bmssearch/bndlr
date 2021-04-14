@@ -110,10 +110,21 @@ export class Service {
   public importBmsManifest = async (
     manifestUrl: string
   ): Promise<Installation[]> => {
+    const { identicalDomainsList } = await this.preferencesRepository.get();
+
+    const cdIdentifierFactory = new CrossDomainIdentifierFactory(
+      identicalDomainsList
+    );
+    const identityFactory = new IdentityFactory(cdIdentifierFactory);
+
     const bmsManifest = await this.bmsManifestRepository.fetch(manifestUrl);
-    const bmsIdentity = createIdentity(
-      bmsManifest.domain,
-      bmsManifest.domainScopedId
+
+    const bmsIdentity = identityFactory.create(
+      {
+        domain: bmsManifest.domain,
+        domainScopedId: bmsManifest.domainScopedId,
+      },
+      bmsManifest.aliases
     );
 
     const bms = await this.bmsRegistrar.register(bmsManifest);
@@ -280,20 +291,3 @@ export class Service {
     return updatedBmsManifestUrls;
   };
 }
-
-const createIdentity = (domain: string, domainScopedId: string) => {
-  const cdIdentifierFactory = new CrossDomainIdentifierFactory([
-    ["bmssearch.net", "venue.bmssearch.net", "ringo.com"],
-  ]);
-  const identityFactory = new IdentityFactory(cdIdentifierFactory);
-
-  const identity = identityFactory.create(
-    {
-      domain: domain,
-      domainScopedId: domainScopedId,
-    },
-    [{ domain: "ringo.com", domainScopedId: "didid" }]
-  );
-
-  return identity;
-};
