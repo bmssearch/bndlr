@@ -19,6 +19,11 @@ Operation has been confirmed on Windows 10.
 Just download an .exe file from Releases and install it.  
 (You will see some security alerts, for we haven't bought a Code Signing Certificate.)
 
+**IMPORTANT**  
+Downloading resources from unconfirmed sources involves security risks.  
+Be aware of that, and use bndlr at your own risk.  
+You can check out examples of security risks [here](https://bndlr.bmssearch.net/security)
+
 For further instruction, see [https://bndlr.bmssearch.net/](https://bndlr.bmssearch.net/)
 
 ## Licese
