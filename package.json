@@ -22,7 +22,7 @@
     "url": "https://github.com/bmssearch/bndlr.git"
   },
   "private": true,
-  "license": "MIT",
+  "license": "GPL-3.0",
   "config": {
     "forge": "./forge.config.js"
   },
