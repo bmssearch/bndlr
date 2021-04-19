@@ -116,10 +116,7 @@ const installationWorker = new InstallationWorker(
   installationFolderNamer
 );
 
-const observationWorker = new ObservationWorker(
-  preferencesRepository,
-  observationRepository
-);
+const observationWorker = new ObservationWorker(preferencesRepository);
 
 const service = new Service(
   preferencesRepository,

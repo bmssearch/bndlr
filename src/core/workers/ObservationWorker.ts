@@ -1,38 +1,29 @@
-import { ObservationRepository } from "../repositories/ObservationRepository";
+import { DateTime } from "luxon";
 import { PreferencesRepository } from "../repositories/PreferencesRepository";
-import { isOverInterval } from "../utils/date";
-
-const OBSERVATION_CHECK_INTERVAL_MIN = 1;
+import schedule from "node-schedule";
 
 export class ObservationWorker {
-  private timer?: NodeJS.Timeout;
+  private job?: schedule.Job;
   private onDetectUpdate: (() => void)[] = [];
 
-  constructor(
-    private preferencesRepository: PreferencesRepository,
-    private observationRepository: ObservationRepository
-  ) {}
+  constructor(private preferencesRepository: PreferencesRepository) {}
 
   public start = () => {
-    this.timer = setInterval(async () => {
-      const now = new Date();
+    const handler = async () => {
+      this.onDetectUpdate.forEach((v) => v());
 
       const { observationIntervalMin } = await this.preferencesRepository.get();
+      const intervalMin = Math.max(observationIntervalMin, 1);
+      const next = DateTime.local().plus({ minute: intervalMin }).toJSDate();
+      this.job = schedule.scheduleJob(next, handler);
+    };
 
-      const observations = await this.observationRepository.list();
-      if (
-        observations.some((o) =>
-          isOverInterval(o.checkedAt, now, observationIntervalMin * 60)
-        )
-      ) {
-        this.onDetectUpdate.forEach((v) => v());
-      }
-    }, OBSERVATION_CHECK_INTERVAL_MIN * 60 * 1000);
+    handler();
   };
 
   public close = () => {
-    if (this.timer) {
-      clearInterval(this.timer);
+    if (this.job) {
+      this.job.cancel();
     }
   };
 

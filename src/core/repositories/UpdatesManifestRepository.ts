@@ -2,19 +2,22 @@ import { ManifestInvalidError, RequestError } from "../models/errors";
 import { UpdatesManifest, UpdatesManifestBms } from "../models/UpdatesManifest";
 import nodeFetch, { Response } from "node-fetch";
 
+import { URL } from "url";
 import { UpdatesManifestHelper } from "@bmssearch/bms-bundle-manifest";
 import { urlDomain } from "../utils/url";
 
 export interface UpdatesManifestRepository {
-  fetch: (manifestUrl: string) => Promise<UpdatesManifest>;
+  fetch: (manifestUrl: string, from: Date) => Promise<UpdatesManifest>;
 }
 
 export class NetworkUpdatesManifestRepository
   implements UpdatesManifestRepository {
-  public fetch = async (manifestUrl: string) => {
+  public fetch = async (manifestUrl: string, from: Date) => {
     let res: Response;
     try {
-      res = await nodeFetch(manifestUrl);
+      const url = new URL(manifestUrl);
+      url.searchParams.append("from", from.getTime().toString());
+      res = await nodeFetch(url);
     } catch (err) {
       throw new RequestError(
         `「${manifestUrl}」のマニフェスト取得に失敗しました。\n${err.message}`,

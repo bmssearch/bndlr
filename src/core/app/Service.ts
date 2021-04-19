@@ -224,15 +224,11 @@ export class Service {
 
     const updatedBmsManifestUrlsList = await Promise.all(
       observations.map(async (observation) => {
-        await this.observationRepository.markChecked(
-          observation.manifestUrl,
-          new Date()
-        );
-
         let updates: UpdatesManifest;
         try {
           updates = await this.updatesManifestRepository.fetch(
-            observation.manifestUrl
+            observation.manifestUrl,
+            observation.checkedAt
           );
         } catch (err) {
           if (err instanceof RequestError) {
@@ -256,6 +252,11 @@ export class Service {
           }
           return null;
         }
+
+        await this.observationRepository.markChecked(
+          observation.manifestUrl,
+          new Date()
+        );
 
         const manifestUrls = await Promise.all(
           (updates.bmses || []).map(async (updatedBms) => {
