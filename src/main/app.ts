@@ -44,7 +44,7 @@ export class BndlrApp {
   public run = async () => {
     console.log("BUNDLR APP RUNNING");
 
-    this.dbc.initialize();
+    await this.dbc.initialize();
 
     const { launchOnStartup } = await this.preferencesRepository.get();
     setAutoLaunch(this.autoLaunch, launchOnStartup);

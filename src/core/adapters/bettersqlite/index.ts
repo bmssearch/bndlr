@@ -15,14 +15,14 @@ export class DatabaseConnector {
     return this.rawDb!;
   };
 
-  public initialize = () => {
+  public initialize = async () => {
     this.rawDb = new BetterSqlite(
       path.join(app.getPath("userData"), "bndlr.sqlite"),
       { verbose: console.log }
     );
     this.rawDb.exec("PRAGMA foreign_keys=true");
 
-    migrate(this.rawDb);
+    await migrate(this.rawDb);
   };
 
   public close = () => {

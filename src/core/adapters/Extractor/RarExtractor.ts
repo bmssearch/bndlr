@@ -13,7 +13,7 @@ export class RarExtractor extends Extractor {
     }
 
     throw new FileFormatNotSupportedError(
-      "RARサポートしたかったけどできなかった"
+      "RARサポートしたかったけどまだできていない。CONTRIBUTE求！"
     );
   };
 }
