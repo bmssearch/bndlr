@@ -1,6 +1,4 @@
-import { Group as BbsGroup } from "@bmssearch/bms-bundle-manifest";
 import { Identifier } from "./Identity";
-import { urlDomain } from "../utils/url";
 
 export interface GroupManifestAttrs {
   manifestUrl: string;
@@ -13,7 +11,7 @@ export interface GroupManifestAttrs {
   bmses?: GroupManifestBms[];
 }
 
-interface GroupManifestBms {
+export interface GroupManifestBms {
   domain: string;
   domainScopedId: string;
   manifestUrl: string;
@@ -39,31 +37,4 @@ export class GroupManifest implements GroupManifestAttrs {
     this.updatesManifestUrl = attrs.updatesManifestUrl;
     this.bmses = attrs.bmses;
   }
-
-  public static fromRawManifest = (
-    manifestUrl: string,
-    raw: BbsGroup
-  ): GroupManifest => {
-    const bmses = raw.bmses?.map(
-      (bms): GroupManifestBms => ({
-        domain: urlDomain(manifestUrl),
-        domainScopedId: bms.id,
-        manifestUrl: bms.url,
-      })
-    );
-    const aliases: Identifier[] | undefined = raw.aliases?.map((a) => ({
-      domain: a.domain,
-      domainScopedId: a.id,
-    }));
-    return new GroupManifest({
-      manifestUrl,
-      domain: urlDomain(manifestUrl),
-      domainScopedId: raw.id,
-      aliases,
-      name: raw.name,
-      websiteUrl: raw.website_url,
-      updatesManifestUrl: raw.updates_url,
-      bmses,
-    });
-  };
 }

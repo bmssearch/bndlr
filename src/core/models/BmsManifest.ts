@@ -1,7 +1,5 @@
-import { Bms as BbsBms } from "@bmssearch/bms-bundle-manifest";
 import { Identifier } from "./Identity";
 import { ResourceManifest } from "./ResourceManifest";
-import { urlDomain } from "../utils/url";
 
 export interface BmsManifestAttrs {
   manifestUrl: string;
@@ -37,25 +35,4 @@ export class BmsManifest implements BmsManifestAttrs {
     this.updatesManifestUrl = attrs.updatesManifestUrl;
     this.resources = attrs.resources;
   }
-
-  public static fromSpec = (manifestUrl: string, spec: BbsBms): BmsManifest => {
-    const resources = spec.resources.map((res) =>
-      ResourceManifest.fromSpec(res)
-    );
-    const aliases: Identifier[] | undefined = spec.aliases?.map((a) => ({
-      domain: a.domain,
-      domainScopedId: a.id,
-    }));
-    return new BmsManifest({
-      manifestUrl,
-      domain: urlDomain(manifestUrl),
-      domainScopedId: spec.id,
-      aliases,
-      title: spec.title,
-      websiteUrl: spec.website_url,
-      groupManifestUrls: spec.group_urls,
-      updatesManifestUrl: spec.updates_url,
-      resources,
-    });
-  };
 }

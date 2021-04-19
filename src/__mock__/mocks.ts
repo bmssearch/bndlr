@@ -51,7 +51,6 @@ export const mockGroupManifest = new GroupManifest({
 });
 
 export const mockUpdatesManifest = new UpdatesManifest({
-  timestamp: new Date(),
   bmses: [
     {
       domain: "bmssearch.net",

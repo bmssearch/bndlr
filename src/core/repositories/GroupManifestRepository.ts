@@ -1,8 +1,10 @@
+import { GroupManifest, GroupManifestBms } from "../models/GroupManifest";
 import { ManifestInvalidError, RequestError } from "../models/errors";
 import nodeFetch, { Response } from "node-fetch";
 
-import { GroupManifest } from "../models/GroupManifest";
-import { GroupManifest as GroupManifestLib } from "@bmssearch/bms-bundle-manifest";
+import { GroupManifestHelper } from "@bmssearch/bms-bundle-manifest";
+import { Identifier } from "../models/Identity";
+import { urlDomain } from "../utils/url";
 
 export interface GroupManifestRepository {
   fetch: (manifestUrl: string) => Promise<GroupManifest>;
@@ -34,9 +36,31 @@ export class NetworkGroupManifestRepository implements GroupManifestRepository {
     }
 
     try {
-      const group = GroupManifestLib.cast(json);
-      const manifest = GroupManifest.fromRawManifest(manifestUrl, group);
-      return manifest;
+      const group = GroupManifestHelper.cast(json);
+
+      const bmses = group.bmses?.map(
+        (bms): GroupManifestBms => ({
+          domain: urlDomain(manifestUrl),
+          domainScopedId: bms.id,
+          manifestUrl: bms.manifest_url,
+        })
+      );
+
+      const aliases: Identifier[] | undefined = group.aliases?.map((a) => ({
+        domain: a.domain,
+        domainScopedId: a.id,
+      }));
+
+      return new GroupManifest({
+        manifestUrl,
+        domain: urlDomain(manifestUrl),
+        domainScopedId: group.id,
+        aliases,
+        name: group.name,
+        websiteUrl: group.website_url,
+        updatesManifestUrl: group.updates_manifest_url,
+        bmses,
+      });
     } catch (err) {
       throw new ManifestInvalidError(err.message, err);
     }

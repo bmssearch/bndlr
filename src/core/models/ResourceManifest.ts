@@ -1,5 +1,3 @@
-import { BmsResource as BbsBmsResource } from "@bmssearch/bms-bundle-manifest";
-
 export interface ResourceManifestAttrs {
   url: string;
   type: "core" | "patch" | "additional";
@@ -19,14 +17,4 @@ export class ResourceManifest implements ResourceManifestAttrs {
     this.updatedAt = attrs.updatedAt;
     this.name = attrs.name;
   }
-
-  public static fromSpec = (spec: BbsBmsResource): ResourceManifest => {
-    return {
-      url: spec.url,
-      type: spec.type,
-      updatedAt:
-        spec.updated_at !== undefined ? new Date(spec.updated_at) : undefined,
-      name: spec.name,
-    };
-  };
 }
