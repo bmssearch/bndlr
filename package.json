@@ -1,7 +1,7 @@
 {
   "name": "bndlr",
   "productName": "bndlr",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "description": "BMS bundle installer",
   "main": ".webpack/main",
   "scripts": {
