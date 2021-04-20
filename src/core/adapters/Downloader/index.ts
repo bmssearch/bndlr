@@ -48,7 +48,7 @@ export class Downloader {
 
         res.pipe(outfileStream);
 
-        res.on("data", (chunk) => {
+        outfileStream.on("data", (chunk) => {
           transferedByte += chunk.length;
           this.progressListeners.forEach((h) =>
             h({ type: "transfer", transferedByte, totalByte: contentLength })
@@ -60,12 +60,12 @@ export class Downloader {
           }
         });
 
-        res.on("error", (err) => {
+        outfileStream.on("error", (err) => {
           outfileStream.destroy();
           reject(err);
         });
 
-        res.on("end", () => {
+        outfileStream.on("finish", () => {
           outfileStream.close();
           resolve({ filePath: outPath });
         });

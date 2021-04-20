@@ -32,9 +32,11 @@ export class ZipExtractor extends Extractor {
 
       const extractStream = stream.pipe(unzipper.Extract({ path: dist }));
       extractStream.on("error", (err) => {
+        stream.destroy();
         reject(err);
       });
       extractStream.on("finish", () => {
+        stream.destroy();
         resolve();
       });
     });
@@ -56,9 +58,11 @@ const estimateExtractedSize = (filePath: string): Promise<number> => {
       entry.autodrain();
     });
     parseStream.on("error", (err) => {
+      readStream.destroy();
       reject(err);
     });
     parseStream.on("finish", () => {
+      readStream.destroy();
       resolve(extractedSize);
     });
   });

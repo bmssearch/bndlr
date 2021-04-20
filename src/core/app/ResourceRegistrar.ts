@@ -27,7 +27,10 @@ export class ResourceRegistrar {
       resource.id
     );
 
-    if (isUpToDate(resourceManifest.updatedAt, latestInstallation?.createdAt)) {
+    if (
+      isUpToDate(resourceManifest.updatedAt, latestInstallation?.createdAt) &&
+      latestInstallation?.status == "installed"
+    ) {
       return null;
     }
 

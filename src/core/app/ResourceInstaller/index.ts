@@ -47,9 +47,8 @@ export class ResourceInstaller {
     });
     const downloaded = await downloader.download(url, tdp.path);
 
-    const extractor = this.extractorFactory.create();
     this.emitProgress({ type: "extracting" });
-
+    const extractor = this.extractorFactory.create();
     const extractPath = path.join(tdp.path, "extracted");
     await extractor.extract(downloaded.filePath, extractPath);
 
