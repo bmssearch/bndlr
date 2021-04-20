@@ -1,7 +1,7 @@
 {
   "name": "bndlr",
   "productName": "bndlr",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "BMS bundle installer",
   "main": ".webpack/main",
   "scripts": {
@@ -75,7 +75,7 @@
     "webpack": "^4.42.1"
   },
   "dependencies": {
-    "@bmssearch/bms-bundle-manifest": "0.0.9",
+    "@bmssearch/bms-bundle-manifest": "0.0.10",
     "auto-launch": "^5.0.5",
     "better-sqlite3": "^7.1.4",
     "clsx": "^1.1.1",
