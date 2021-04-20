@@ -45,7 +45,7 @@ export class ResourceSelector {
       (r) => !excludingDomainSet.has(urlDomain(r.url))
     );
 
-    if (downloadableResources.length === 0) return null;
+    if (downloadableResources.length === 0) return coreResources[0];
 
     switch (this.config.coreResourceSelectionMethod) {
       case "first": {
