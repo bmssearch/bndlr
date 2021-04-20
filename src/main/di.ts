@@ -179,5 +179,6 @@ export const bndlrApp = new BndlrApp(
   service,
 
   mainWindow,
+  preferencesWindow,
   appTray
 );

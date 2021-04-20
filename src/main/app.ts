@@ -12,6 +12,7 @@ import { MainWindow } from "./windows/MainWindow";
 import { Notificator } from "./Notificator";
 import { ObservationWorker } from "../core/workers/ObservationWorker";
 import { PreferencesRepository } from "../core/repositories/PreferencesRepository";
+import { PreferencesWindow } from "./windows/PreferencesWindow";
 import { Service } from "../core/app/Service";
 import { setAutoLaunch } from "./settings";
 //@ts-ignore
@@ -38,6 +39,7 @@ export class BndlrApp {
 
     // windows
     private mainWindow: MainWindow,
+    private preferencesWindow: PreferencesWindow,
     private appTray: AppTray
   ) {}
 
