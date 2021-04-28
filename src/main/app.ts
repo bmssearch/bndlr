@@ -14,6 +14,7 @@ import { ObservationWorker } from "../core/workers/ObservationWorker";
 import { PreferencesRepository } from "../core/repositories/PreferencesRepository";
 import { PreferencesWindow } from "./windows/PreferencesWindow";
 import { Service } from "../core/app/Service";
+import log from "electron-log";
 import { setAutoLaunch } from "./settings";
 //@ts-ignore
 import trayWindow from "electron-tray-window";
@@ -44,7 +45,7 @@ export class BndlrApp {
   ) {}
 
   public run = async () => {
-    console.log("BUNDLR APP RUNNING");
+    log.info("BUNDLR APP RUNNING");
 
     await this.dbc.initialize();
 

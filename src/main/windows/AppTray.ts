@@ -1,15 +1,18 @@
-import { Tray } from "electron";
+import { Tray, app } from "electron";
+
 import path from "path";
+
+const base = app.getAppPath();
 
 const icons = {
   default:
     process.platform === "win32"
-      ? path.join(__dirname, "assets/tray_icon_win_white.ico")
-      : path.join(__dirname, "assets/tray_icon_osx_black.png"),
+      ? path.join(base, ".webpack/main/assets/tray_icon_win_white.ico")
+      : path.join(base, ".webpack/main/assets/tray_icon_osx_black.png"),
   active:
     process.platform === "win32"
-      ? path.join(__dirname, "assets/tray_icon_win_white_active.ico")
-      : path.join(__dirname, "assets/tray_icon_osx_black.png"),
+      ? path.join(base, ".webpack/main/assets/tray_icon_win_white_active.ico")
+      : path.join(base, ".webpack/main/assets/tray_icon_osx_black.png"),
 };
 
 export class AppTray {

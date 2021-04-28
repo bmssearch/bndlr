@@ -6,6 +6,7 @@ import { setDefaultProtocol } from "./settings";
 
 if (require("electron-squirrel-startup")) {
   app.quit();
+  process.exit(0);
 }
 
 process.on("uncaughtException", (err) => {
@@ -28,6 +29,15 @@ if (!gotTheLock) {
   setDefaultProtocol();
 
   app.on("ready", () => {
-    bndlrApp.run();
+    log.info("APP IS READY");
+
+    bndlrApp.run().catch((err) => {
+      log.error(err);
+      dialog.showErrorBox(
+        "アプリの初期化中にエラーが発生しました",
+        "報告お願いします。"
+      );
+      app.quit();
+    });
   });
 }
