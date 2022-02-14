@@ -30,4 +30,5 @@ module.exports = {
   resolve: {
     extensions: [".js", ".ts", ".jsx", ".tsx", ".scss", ".png"],
   },
+  devtool: "cheap-module-source-map",
 };

@@ -51,7 +51,7 @@ export class AppHandler {
         } catch (err) {
           if (err instanceof RequestError) {
             this.notificator.show(
-              "BMSマニフェストを取得できませんでした",
+              "ぎょぎょぎょBMSマニフェストを取得できませんでした",
               err.message
             );
           } else if (err instanceof ManifestInvalidError) {
@@ -64,7 +64,7 @@ export class AppHandler {
             dialog.showErrorBox(
               "何このエラー",
               "こんなエラー起こるはずではなかった、、開発者に教えていただけると嬉しいです。\n\n" +
-                err.message
+                (err as Error).message
             );
           }
         }
@@ -98,7 +98,7 @@ export class AppHandler {
           dialog.showErrorBox(
             "何このエラー",
             "こんなエラー起こるはずではなかった、、開発者に教えていただけると嬉しいです。\n\n" +
-              err.message
+              (err as Error).message
           );
         }
       }
@@ -117,7 +117,7 @@ export class AppHandler {
         dialog.showErrorBox(
           "何このエラー",
           "こんなエラー起こるはずではなかった、、開発者に教えていただけると嬉しいです。\n\n" +
-            err.message
+            (err as Error).message
         );
       }
     });
@@ -237,7 +237,7 @@ export class AppHandler {
         } else {
           dialog.showErrorBox(
             "カスタムフォルダの出力に失敗しました",
-            err.message
+            (err as Error).message
           );
         }
       }
